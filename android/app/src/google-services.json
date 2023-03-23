@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "654239745338",
+    "firebase_url": "https://ictwork-805e9.firebaseio.com",
+    "project_id": "ictwork-805e9",
+    "storage_bucket": "ictwork-805e9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:654239745338:android:90c770bea5d01d4fc97c03",
+        "android_client_info": {
+          "package_name": "net.jnpass"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "654239745338-fvjql7pdfgt5trnioi5063g30pi16ldg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.jnpass",
+            "certificate_hash": "68f16da3e6f96f100bcaa2e94b44015beb3fba31"
+          }
+        },
+        {
+          "client_id": "654239745338-v6t8313glrdo4tahbv3t6cj87jsd378r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.jnpass",
+            "certificate_hash": "bb0dac74d321e14307719b6290afa1666e445d75"
+          }
+        },
+        {
+          "client_id": "654239745338-eenfkdvjvs616pl7nd1m5ju54qegs9e2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMBv_Kfe45oL__qyE1Lbq0uoO4zS6U4WQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "654239745338-eenfkdvjvs616pl7nd1m5ju54qegs9e2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "654239745338-ipj97j5j84vvi8kck1v5ahulskctvrj9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.jnpass"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
