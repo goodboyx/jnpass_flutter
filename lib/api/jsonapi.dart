@@ -82,8 +82,51 @@ class JsonApi {
           apiResponse.apiError = ApiError("4", "401");
           break;
         default:
-          apiResponse.apiError = ApiError("1", "http 상태 에러");
+          apiResponse.apiError = ApiError("1", "${response.statusCode} http 상태 에러");
         break;
+      }
+    } on SocketException {
+      apiResponse.apiError = ApiError("8", "$link socket error");
+    }
+
+    return apiResponse;
+  }
+
+  // delete API
+  static Future<ApiResponse> deleteApi(String link, Map<String, dynamic>? parameters) async {
+
+    ApiResponse apiResponse = ApiResponse();
+
+    try {
+
+      var uri = Uri.https(domainUrl, "/$link");
+
+      debugPrint('delete api ${uri.toString()}');
+
+      final response = await http.delete(
+          uri,
+          headers: <String, String> {
+            // "Accept": "application/json",
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: parameters,
+          // body: json.encode(parameters),
+          encoding:Encoding.getByName('utf-8')
+      );
+
+
+      switch (response.statusCode) {
+        case 200:
+          var responseBody = response.body;
+          apiResponse.data = responseBody;
+          apiResponse.apiError = ApiError("9", "");
+          break;
+        case 401:
+          apiResponse.apiError = ApiError("4", "401");
+          break;
+        default:
+          apiResponse.apiError = ApiError("1", "http 상태 에러");
+          break;
       }
     } on SocketException {
       apiResponse.apiError = ApiError("8", "$link socket error");
