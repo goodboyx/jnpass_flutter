@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
@@ -127,7 +128,7 @@ class HomePageState extends State<HomePage> {
 
   // 동네소식
   void dataConsult() {
-    // BoardData.items.clear();
+    BoardData.items.clear();
 
     final parameters = {"page": "1", "limit": "4", "jwt_token":jwtToken};
     JsonApi.getApi("rest/board/news", parameters).then((value) {
@@ -241,7 +242,7 @@ class HomePageState extends State<HomePage> {
                             onTap: () {
                               Navigator.of(context,rootNavigator: true).push(
                                   MaterialPageRoute(builder: (context) =>
-                                      ConsultWrite())
+                                      const ConsultWrite())
                               );
                             }, // Image tapped
                             child: Image.asset(
@@ -345,13 +346,13 @@ class HomePageState extends State<HomePage> {
                                               onTap: () {
                                                 Navigator.of(context,rootNavigator: true).push(
                                                     MaterialPageRoute(builder: (context) =>
-                                                        NewsView(wrId:BoardData.items[index].wr_id, like:BoardData.items[index].wr_is_like.toString()))).then((value) {
+                                                        NewsView(wrId:BoardData.items[index].wr_id))).then((value) {
+                                                          debugPrint('value : $value');
 
-
-                                                  // dataDonateBoard().then((value) {
-                                                  //   setState(() {
-                                                  //     debugPrint("BoardData.items[index].wr_is_like : ${BoardData.items[index].wr_is_like}");
-                                                  //   });
+                                                          if(value =="reload")
+                                                          {
+                                                            dataConsult();
+                                                          }
                                                   });
                                               },
                                               child: Row(
@@ -467,7 +468,7 @@ class HomePageState extends State<HomePage> {
                           const SizedBox(height: 15),
                           //더보기 버튼
                           GestureDetector(
-                            onTap: () {
+                            onTap: () async {
                               Navigator.of(context,rootNavigator: true).push(
                                 MaterialPageRoute(builder: (context) =>
                                 const NewsPage()),).then((value){
