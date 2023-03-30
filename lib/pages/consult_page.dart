@@ -3,15 +3,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jnpass/pages/password_page.dart';
-import 'package:jnpass/pages/shareview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/jsonapi.dart';
-import '../constants.dart';
 import '../models/apiResponse.dart';
-import '../models/boardmodel.dart';
 import '../models/csmodel.dart';
 
 class ConsultPage extends StatefulWidget {
@@ -128,6 +124,23 @@ class ConsultPageState extends State<ConsultPage> {
       }
 
     });
+  }
+
+  Color getColor(String state) {
+    //red is just a sample color
+    Color color;
+    if(state == "" || state == "1") {
+      color = const Color(0xFF52A4DA);
+    } else if(state == "2") {
+      color = const Color(0xFFE97031);
+    } else if(state == "3") {
+      color = const Color(0xFF98BF54);
+    }
+    else {
+      color = const Color(0xFF52A4DA);
+    }
+
+    return color;
   }
 
 
@@ -298,7 +311,7 @@ class ConsultPageState extends State<ConsultPage> {
                                                                               child: MaterialButton(
                                                                                 minWidth:40,
                                                                                 height: 25,
-                                                                                color: const Color(0xFFE97031),
+                                                                                color: getColor(CsData.items[index].wr_6),
                                                                                 onPressed: () {
                                                                                 },
                                                                                 child: Text(CsData.items[index].state, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 12)),

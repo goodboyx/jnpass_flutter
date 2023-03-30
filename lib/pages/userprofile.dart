@@ -1,9 +1,5 @@
-// ignore_for_file: non_constant_identifier_names, must_be_immutable
-
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,8 +7,6 @@ import '../api/jsonapi.dart';
 import '../common.dart';
 import '../constants.dart';
 import '../models/apiResponse.dart';
-import '../models/member.dart';
-import 'package:http/http.dart' as http;
 
 
 class UserProfile extends StatefulWidget {
@@ -51,8 +45,6 @@ class ProfileState extends State<UserProfile> {
       if((apiResponse.apiError).error == "9") {
 
         final responseData = json.decode(apiResponse.data.toString());
-        mbData = responseData;
-        isLoading = true;
 
         if(kDebug)
         {
@@ -62,7 +54,8 @@ class ProfileState extends State<UserProfile> {
         if(mounted)
         {
           setState(() {
-
+            mbData = responseData;
+            isLoading = true;
           });
         }
 
@@ -96,7 +89,7 @@ class ProfileState extends State<UserProfile> {
           leading: IconButton(
             icon: const Icon(Icons.chevron_left),
             onPressed: () =>
-                Navigator.pop(context, "mb_block"),
+                Navigator.pop(context),
             color: Colors.black,
           ),
           // actions: <Widget>[
@@ -143,38 +136,43 @@ class ProfileState extends State<UserProfile> {
                       height: 0.0,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      MaterialButton(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.0)),
-                        onPressed: () {
-                          debugPrint("차단하기");
-                          _showMyDialog(1);
-                        },
-                        height: 40.0,
-                        minWidth: 140.0,
-                        color: kColor,
-
-                        child: Text(mbData['mb_block'] == "Y" ? "차단해제" : "차단하기",
-                                style: const TextStyle(color: Colors.white, fontSize: 16.0),
-                              ),
-                      ),
-                      const Padding(padding: EdgeInsets.fromLTRB(15.0, 0.0, 0.0, 0.0),),
-                      MaterialButton(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.0)),
-                        onPressed: () {
-                          debugPrint("신고하기");
-                          _showMyDialog(2);
-                        },
-                        height: 40.0,
-                        minWidth: 140.0,
-                        color: kButtonColor,
-                        child: Text(mbData['mb_singo'] == "Y" ? "신고해제" : "신고하기",
-                          style: const TextStyle(color: Colors.white, fontSize: 16.0),
+                      Container(
+                        alignment: Alignment.center,
+                        // padding: const EdgeInsets.only(top: 10, left: 0, right: 10, bottom: 10),
+                        child: ElevatedButton.icon(
+                          onPressed: (){
+                            _showMyDialog(1);
+                          },
+                          icon: const Icon(Icons.dangerous),  //icon data for elevated button
+                          label: Text(mbData['mb_block'] == "Y" ? "차단해제" : "차단하기",
+                            style: const TextStyle(color: Colors.white, fontSize: 16.0), //label text
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            primary: kColor, //background color
+                          ),
                         ),
-                      )
+                      ),
+                      const Padding(padding: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),),
+                      Container(
+                        alignment: Alignment.center,
+                        // padding: const EdgeInsets.only(top: 10, left: 0, right: 10, bottom: 10),
+                        child: ElevatedButton.icon(
+                          onPressed: (){
+                            _showMyDialog(2);
+                          },
+                          icon: const Icon(Icons.safety_check_outlined),  //icon data for elevated button
+                          label: Text(mbData['mb_singo'] == "Y" ? "신고해제" : "신고하기",
+                            style: const TextStyle(color: Colors.white, fontSize: 16.0), //label text
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            primary: kButtonColor, //background color
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ]
@@ -197,13 +195,13 @@ class ProfileState extends State<UserProfile> {
             child: Column(
               children: <Widget>[
                 if(index == 1 && mbData['mb_block'] == "Y")
-                  Text('${mbData['mb_name']}님을 차단해제하시겠습니까?')
+                  Text('${mbData['mb_nick']}님을 차단해제하시겠습니까?')
                 else if(index == 1 && mbData['mb_block'] == "N")
-                  Text('${mbData['mb_name']}님을 차단하시겠습니까?')
+                  Text('${mbData['mb_nick']}님을 차단하시겠습니까?')
                 else if(index == 2 && mbData['mb_singo'] == "Y")
-                  Text('${mbData['mb_name']}님을 신고해제하시겠습니까?')
+                  Text('${mbData['mb_nick']}님을 신고해제하시겠습니까?')
                 else if(index == 2 && mbData['mb_singo'] == "N")
-                  Text('${mbData['mb_name']}님을 신고하시겠습니까?')
+                  Text('${mbData['mb_nick']}님을 신고하시겠습니까?')
                 // Text('Would you like to approve of this message?'),
               ],
             ),
@@ -231,41 +229,52 @@ class ProfileState extends State<UserProfile> {
   }
 
   Future<void> update_singo(int index) async {
-    // Uri url = Uri.parse('${appApiUrl}app_update_singo.php?app_token=$token&mb_id=$mb_id&user_id=${widget.user_id}&type=$index');
-    //
-    // var response = await http.get(url);
-    // var responseBody = response.body;
-    //
-    // final responseData = json.decode(responseBody); // json 응답 값을 decode
-    //
-    // debugPrint('state_type : ${responseData['state_type'].toString()} ');
-    // debugPrint('sql : ${responseData['sql'].toString()} ');
-    //
-    // Navigator.pop(context, 'reload');
 
-    // if(responseData['state_type'].toString() == "1") {
-    //   setState(() {
-    //     mb_block = "Y";
-    //   });
-    // }
-    // else if(responseData['state_type'].toString() == "2")
-    // {
-    //   setState(() {
-    //     mb_block = "N";
-    //   });
-    // }
-    // else if(responseData['state_type'].toString() == "3")
-    // {
-    //   setState(() {
-    //     mb_singo = "Y";
-    //   });
-    // }
-    // else if(responseData['state_type'].toString() == "4")
-    // {
-    //   setState(() {
-    //     mb_singo = "N";
-    //   });
-    // }
+    final parameters = {"jwt_token": jwtToken, "type": index.toString()};
+    JsonApi.postApi("rest/singo/member/${mbData['mb_id']}", parameters).then((value) {
+      ApiResponse apiResponse = ApiResponse();
+
+      apiResponse = value;
+
+      if((apiResponse.apiError).error == "9") {
+
+        final responseData = json.decode(apiResponse.data.toString());
+        if(kDebug)
+        {
+          debugPrint('data ${apiResponse.data}');
+        }
+
+        if(responseData['code'].toString() == "0") {
+          if (responseData['message'] != '') {
+            Fluttertoast.showToast(
+                msg: responseData['message'],
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 13.0
+            );
+          }
+
+          Navigator.pop(context, 'reload');
+        }
+
+      }
+      else
+      {
+        Fluttertoast.showToast(
+            msg: (apiResponse.apiError).msg,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 13.0
+        );
+      }
+
+    });
 
   }
 

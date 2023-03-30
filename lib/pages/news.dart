@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
+import 'package:jnpass/pages/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/jsonapi.dart';
@@ -91,8 +92,8 @@ class NewsPageState extends State<NewsPage> {
             {
               dataBoard(page, false);
             }
-
           }
+
         });
 
       }
@@ -163,7 +164,6 @@ class NewsPageState extends State<NewsPage> {
     NewsBoardData.items.clear();
     setState(() {
       isLoading = false;
-      debugPrint('aa');
     });
 
     final parameters = {"page": page.toString(), "ca_name" : ca_name, "limit": limit.toString(), "jwt_token":jwtToken, "area" : meLoc};
@@ -226,7 +226,6 @@ class NewsPageState extends State<NewsPage> {
               setState(() {
                 totalPage = responseData['total_page'];
                 isLoading = true;
-                debugPrint('bbb');
               });
             }
           }
@@ -237,8 +236,6 @@ class NewsPageState extends State<NewsPage> {
               isLoading = true;
             });
           }
-
-          debugPrint('length : ${NewsBoardData.items.length}');
 
         }
       }
@@ -430,11 +427,26 @@ class NewsPageState extends State<NewsPage> {
                                             onTap: () {
                                               Navigator.of(context,rootNavigator: true).push(
                                                   MaterialPageRoute(builder: (context) =>
-                                                      NewsView(wrId:NewsBoardData.items[index].wr_id, like:NewsBoardData.items[index].wr_is_like.toString()))).then((value) {
-                                                  setState(() {
-                                                //     debugPrint("BoardData.items[index].wr_is_like : ${BoardData.items[index].wr_is_like}");
-                                                  });
-                                              });
+                                                      NewsView(wrId:NewsBoardData.items[index].wr_id))).then((value) {
+                                                        // debugPrint("value : $value");
+
+                                                        if(value == "reload")
+                                                        {
+                                                          dataBoard(1, true);
+                                                        }
+                                                        else if(value == "login")
+                                                        {
+                                                            Navigator.of(context,rootNavigator: true).push(
+                                                              MaterialPageRoute(builder: (context) =>
+                                                              const LoginPage()),).then((value){
+
+                                                            });
+                                                        }
+
+                                                        setState(() {
+                                                      //     debugPrint("BoardData.items[index].wr_is_like : ${BoardData.items[index].wr_is_like}");
+                                                        });
+                                                });
                                             },
                                             child: Row(
                                                 crossAxisAlignment: CrossAxisAlignment.center,

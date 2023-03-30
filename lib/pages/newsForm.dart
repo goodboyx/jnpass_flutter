@@ -1,30 +1,26 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:jnpass/common.dart';
-import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:multi_image_picker2/multi_image_picker2.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 import '../DataUtility.dart';
 import '../api/jsonapi.dart';
 import '../constants.dart';
-import '../models/apiError.dart';
 import '../models/apiResponse.dart';
+import '../models/bannermodel.dart';
 import '../models/boardcategory.dart';
-import '../models/boardmodel.dart';
-import '../models/member.dart';
-import '../util.dart';
-import 'login_page.dart';
+
 
 // ignore: must_be_immutable
 class NewsForm extends StatefulWidget {
@@ -41,22 +37,19 @@ class NewsForm extends StatefulWidget {
 
 class NewsFormState extends State<NewsForm> {
   late SharedPreferences prefs;
-  String jwtToken = '';
 
   bool isLoading = false;
+  bool isLoading2 = false;
   late dynamic mbData;
   late dynamic boardData;
   String selected = "0";
-  bool _initialized = false;
 
-  String w = "new";
-  List<Asset> imageList = <Asset>[];
+  String w = "";
   List<Uint8List> imageListTemp = <Uint8List>[]; // 신규 이미지 파일 정보 담은 변수
   List<String> _imageListTemp = <String>[];      // 기존 이미지 파일 정보 담은 변수
   List<String> removeListTemp = <String>[];      // 삭제 이미지 파일 정보 담은 변수
 
   String error = 'No Error Dectected';
-  int _count = 0;        // 이미지 갯수
   final TextEditingController subjectController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
   List<String> f = [];
@@ -66,13 +59,32 @@ class NewsFormState extends State<NewsForm> {
 
   bool writeState = false;
 
+  int _count = 0;        // 이미지 갯수
+  List<XFile> imageList = [];
+  final ImagePicker _picker = ImagePicker();
+
+
   @override
   void initState () {
 
     SharedPreferences.getInstance().then((value) async {
       prefs = value;
-      jwtToken = prefs.getString('jwt_token') ?? "";
 
+      reloadData();
+    });
+
+    imageListTemp = <Uint8List>[];
+    _imageListTemp = <String>[];
+    removeListTemp = <String>[];
+
+    if(widget.wrId.isNotEmpty)
+    {
+      w = "u";
+      boardViewData();
+      boardViewImgData();
+    }
+    else
+    {
       final parameters = {"jwt_token": jwtToken};
       JsonApi.getApi("rest/jwt_token", parameters).then((value) {
         ApiResponse apiResponse = ApiResponse();
@@ -90,7 +102,23 @@ class NewsFormState extends State<NewsForm> {
             debugPrint('data ${mbData['data']['mb_id']}');
 
           }
+          else if(responseData['code'].toString() == "101")
+          {
+            if(responseData['message'].toString() != "")
+            {
+              Fluttertoast.showToast(
+                  msg: responseData['message'],
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 13.0
+              );
+            }
 
+            Navigator.pop(context);
+          }
 
           setState(() {
 
@@ -111,14 +139,7 @@ class NewsFormState extends State<NewsForm> {
         }
 
       });
-
-      reloadData();
-    });
-
-
-    imageListTemp = <Uint8List>[];
-    _imageListTemp = <String>[];
-    removeListTemp = <String>[];
+    }
 
     super.initState ();
   }
@@ -195,14 +216,14 @@ class NewsFormState extends State<NewsForm> {
   @override
   Widget build(BuildContext context) {
 
-    // if (!_initialized) {
-    //   return Container(
-    //     color: Colors.white,
-    //     child: const Center(
-    //       child: CircularProgressIndicator(),
-    //     ),
-    //   );
-    // }
+    if (w == "u" && !isLoading && !isLoading2) {
+      return Container(
+        color: Colors.white,
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
     return Scaffold(
       // We're using a Builder here so we have a context that is below the Scaffold
@@ -262,7 +283,7 @@ class NewsFormState extends State<NewsForm> {
                                 padding: const EdgeInsets.all(15.0),
                                 child: TextButton.icon(
                                   onPressed: () => {
-                                    loadAssets()
+                                    _showBottomSheet()
                                   },
                                   icon: Column(
                                     children: [
@@ -308,15 +329,31 @@ class NewsFormState extends State<NewsForm> {
                                     scrollDirection: Axis.horizontal,
                                     itemCount: imageList.length,
                                     itemBuilder: (BuildContext context, int index) {
-                                      Asset asset = imageList[index];
 
                                       return Card(
                                           elevation: 3,
                                           shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(15)),
+                                              borderRadius: BorderRadius.circular(5)),
                                           child: Stack(
                                               children: [
-                                                AssetThumb(asset: asset, width: 300, height: 300),
+                                                Container(
+                                                  width: 70.0,
+                                                  height: 90.0,
+                                                  padding: const EdgeInsets.only(top: 5),
+                                                  child: ClipRRect(
+                                                    borderRadius: BorderRadius.circular(0.0),
+                                                    child: FadeInImage(
+                                                      placeholder: const AssetImage("assets/images/profile.png"),
+                                                      image: FileImage(File(imageList[index].path)),
+                                                      imageErrorBuilder:
+                                                          (context, error, stackTrace) {
+                                                        return Image.asset(
+                                                            'assets/images/profile.png',
+                                                            fit: BoxFit.fitWidth);
+                                                      },
+                                                    ),
+                                                  ),
+                                                ),
                                                 Positioned(
                                                   top: 0,
                                                   right: 0,
@@ -368,8 +405,7 @@ class NewsFormState extends State<NewsForm> {
                                           borderRadius: BorderRadius.circular(15)),
                                       child: Stack(
                                           children: [
-                                            Image.memory(asset),
-                                            // AssetThumb(asset: asset, width: 300, height: 300),
+                                            Image.memory(asset, width: 100, height: 300, fit: BoxFit.fitWidth),
                                             Positioned(
                                               top: 0,
                                               right: 0,
@@ -493,7 +529,7 @@ class NewsFormState extends State<NewsForm> {
   Future<void> boardViewData() async {
 
     final parameters = {"jwt_token": jwtToken};
-    JsonApi.getApi("rest/board/news/${widget.wrId}", parameters).then((value) {
+    JsonApi.getApi("rest/board/news/${widget.wrId}", parameters).then((value) async {
       ApiResponse apiResponse = ApiResponse();
 
       apiResponse = value;
@@ -507,12 +543,15 @@ class NewsFormState extends State<NewsForm> {
         if(boardData['code'].toString() == '0')
         {
           isLoading = true;
+          subjectController.text = boardData['wr_subject'].toString();
+          contentController.text = boardData['wr_content'].toString();
+          currentSelectedValue = boardData['ca_name'].toString();
+
+          setState(() {
+
+          });
+
         }
-
-        setState(() {
-
-        });
-
       }
       else
       {
@@ -530,27 +569,143 @@ class NewsFormState extends State<NewsForm> {
     });
   }
 
-  // Future<bool> getBoardData() async {
-  //
-  //   final prefs = await SharedPreferences.getInstance();
-  //   String mbId = prefs.getString('mb_id')  ?? '';
-  //   Uri url = Uri.parse('${appApiUrl}app_board_data.php?bo_table=${widget.boTable}&wr_id=${widget.wrId}&mb_id=$mbId');
-  //   var response = await http.get(url);
-  //   var responseBody = response.body;
-  //   final responseData = json.decode(responseBody); // json 응답 값을 decode
-  //
-  //   debugPrint('----------');
-  //   debugPrint(responseBody);
-  //   debugPrint('----------');
-  //
-  //
-  //   debugPrint(responseData['wr_subject']);
-  //   debugPrint(responseData['wr_content']);
-  //   debugPrint(responseData['ca_name']);
-  //
-  //
-  //   return false;
-  // }
+  Future<void> boardViewImgData() async {
+
+    final parameters = {"jwt_token": jwtToken};
+    JsonApi.getApi("rest/image/news/${widget.wrId}", parameters).then((value) async {
+      ApiResponse apiResponse = ApiResponse();
+
+      apiResponse = value;
+      DonationBannerData.items.clear();
+
+      if((apiResponse.apiError).error == "9") {
+
+        final responseData = json.decode(apiResponse.data.toString());
+        debugPrint('data ${apiResponse.data}');
+
+        if(responseData['code'].toString() == '0')
+        {
+
+          DataUtility utility = DataUtility();
+
+          if(responseData['items'].toString() != "null") {
+            DonationBannerData.items = List.from(responseData['items'])
+                .map<BannerModel>((item) => BannerModel.fromJson(item))
+                .toList();
+
+            for(var i =0; i < DonationBannerData.items.length; i++)
+            {
+              String _url = DonationBannerData.items[i].img_src;
+
+              ByteData bytes = await NetworkAssetBundle(Uri.parse(_url)).load(_url);
+              Uint8List image2 = utility.getImageFromByteData(bytes);
+              imageListTemp.add(image2);
+              _imageListTemp.add(_url);
+            }
+
+            isLoading2 = true;
+          }
+
+          setState(() {
+
+          });
+
+        }
+      }
+      else
+      {
+        Fluttertoast.showToast(
+            msg: (apiResponse.apiError).msg,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 13.0
+        );
+      }
+
+    });
+  }
+
+  _showBottomSheet() {
+    return showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(25),
+        ),
+      ),
+      builder: (context) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(5.0, 5.0, 5.0, 5.0),
+              child: TextButton.icon(
+                icon: const Icon(Icons.camera_alt),
+                onPressed: () {
+                  _getCameraImage();
+                },
+                style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    elevation: 2,
+                    backgroundColor: const Color(0XFF98BF54)),
+                label: const Text(
+                  '사진찍기',
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(5.0, 5.0, 5.0, 5.0),
+              child: TextButton.icon(
+                icon: const Icon(Icons.photo_library),
+                onPressed: () {
+                  _getPhotoLibraryImage();
+                },
+                style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    elevation: 2,
+                    backgroundColor: const Color(0XFF52A4DA)),
+                label: const Text('사진 불러오기',
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                ),
+              ),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  // 사진 찍기
+  _getCameraImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      File rotatedImage = await FlutterExifRotation.rotateAndSaveImage(path: pickedFile!.path);
+
+      setState(() {
+        imageList.add(XFile(rotatedImage.path));
+        _count = imageList.length;
+      });
+
+    } else {
+      debugPrint('이미지 선택안함');
+    }
+  }
+
+  // 사진 라이브러리 가져오기
+  _getPhotoLibraryImage() async {
+    final List<XFile>? images = await _picker.pickMultiImage();
+    if (images != null) {
+      setState(() {
+        imageList += images;
+        _count = imageList.length;
+      });
+    }
+  }
 
   // 등록완료
   Future<void> uploadAction() async {
@@ -576,19 +731,16 @@ class NewsFormState extends State<NewsForm> {
       var request = http.MultipartRequest('POST', uri);
 
       request.fields["jwt_token"] = jwtToken;
-      request.fields["w"] = "";
-      request.fields["ca_name"]   = currentSelectedValue;
+      request.fields["w"] = w;
       request.fields["wr_id"]     = widget.wrId;
+      request.fields["ca_name"]   = currentSelectedValue;
       request.fields['del_file']  = removeListTemp.toString();
       request.fields["wr_1"]     = meLoc;
-      request.fields["wr_subject"] = await json.decode(json.encode(subjectController.text));
-      request.fields["wr_content"] = await json.decode(json.encode(contentController.text));
+      request.fields["wr_subject"] = subjectController.text;
+      request.fields["wr_content"] = contentController.text;
 
       for (int i = 0; i < imageList.length; i++) {
-        final tempFile = await getFileFromAsset(imageList[i]);
-
-        var pic = await http.MultipartFile.fromPath("bf_file[]", tempFile.path);
-        // var pic = await http.MultipartFile.fromBytes("bf_file", tempFile.readAsBytesSync());
+        var pic = await http.MultipartFile.fromPath("bf_file[]", imageList[i].path);
         request.files.add(pic);
       }
 
@@ -599,6 +751,8 @@ class NewsFormState extends State<NewsForm> {
 
         final responseData = json.decode(response.body); // json 응답 값을 decode
 
+        debugPrint(response.body);
+
         if(kDebug)
         {
           debugPrint("responseData : $responseData");
@@ -606,8 +760,21 @@ class NewsFormState extends State<NewsForm> {
 
         if(responseData['code'].toString() == "0")
         {
-          // connect(responseData['wr_id'].toString());
-          Navigator.pop(context, responseData);
+
+          if(responseData['message'] != '')
+          {
+            Fluttertoast.showToast(
+                msg: responseData['message'],
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 13.0
+            );
+          }
+
+          Navigator.pop(context, "reload");
         }
         else
         {
@@ -645,48 +812,6 @@ class NewsFormState extends State<NewsForm> {
 
   Uint8List getImageFromByteData(ByteData data){
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-  }
-
-
-  // 사진첩 가져오기
-  Future<void> loadAssets() async {
-    List<Asset> resultList = <Asset>[];
-    String error = '';
-
-    try {
-      resultList = await MultiImagePicker.pickImages(
-        maxImages: 10,
-        enableCamera: true,
-        selectedAssets: imageList,
-        cupertinoOptions: const CupertinoOptions(
-          takePhotoIcon: "chat",
-          doneButtonTitle: "등록",
-          // autoCloseOnSelectionLimit:false,  //선택 제한에 도달하는 즉시 이미지 선택기가 닫힙니다.
-        ),
-        materialOptions: const MaterialOptions(
-          actionBarColor: "#000000",
-          // actionBarTitleColor: "#FFFFFF",
-          actionBarTitle: "사진 가져오기",
-          allViewTitle: "전체",
-          useDetailsView: false,
-          selectCircleStrokeColor: "#000000",
-        ),
-      );
-    } on Exception catch (e) {
-      error = e.toString();
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      imageList = resultList;
-
-      error = error;
-      _count = imageList.length;
-    });
   }
 
   Future<File> getFileFromAsset(Asset asset) async {
@@ -796,41 +921,6 @@ class NewsFormState extends State<NewsForm> {
     );
   }
 
-  Future<MqttServerClient> connect(String wrId, String w) async {
-    // print('app_' + (random.nextInt(90) * 10).toString());
-
-    MqttServerClient client =
-    MqttServerClient.withPort('driver.cloudmqtt.com', 'app_${Random.secure().nextInt(10000) * 100}' , 18749);
-
-    client.logging(on: true);
-    client.onConnected = onConnected;
-    client.onDisconnected = onDisconnected;
-
-    try {
-      await client.connect('ccsfssyj', '-UJ0-kP8Wr8h');
-    } catch (e) {
-      // print('mqtt Exception: $e');
-      client.disconnect();
-    }
-
-    const pubTopic = 'notice';
-    final builder = MqttClientPayloadBuilder();
-    // builder.addString('$w@@write@@${widget.boTable}@@$wrId');
-
-    client.publishMessage(pubTopic, MqttQos.atLeastOnce, builder.payload!);
-
-    client.disconnect();
-    return client;
-  }
-
-  void onConnected() {
-    // print('Connected');
-  }
-
-  void onDisconnected()
-  {
-    // print('Disconnected');
-  }
 
   @override
   void dispose() {

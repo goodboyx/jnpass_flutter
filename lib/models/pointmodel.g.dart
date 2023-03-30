@@ -17,8 +17,6 @@ PointModel _$PointModelFromJson(Map<String, dynamic> json) => PointModel(
       json['mo_rel_table'] as String,
       json['mo_rel_id'] as String,
       json['mo_rel_action'] as String,
-      json['total_count'] as int,
-      json['total_page'] as int,
     );
 
 Map<String, dynamic> _$PointModelToJson(PointModel instance) =>
@@ -33,6 +31,4 @@ Map<String, dynamic> _$PointModelToJson(PointModel instance) =>
       'mo_rel_table': instance.mo_rel_table,
       'mo_rel_id': instance.mo_rel_id,
       'mo_rel_action': instance.mo_rel_action,
-      'total_count': instance.total_count,
-      'total_page': instance.total_page,
     };

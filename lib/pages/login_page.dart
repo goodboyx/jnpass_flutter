@@ -70,7 +70,12 @@ class LoginPageState extends State<LoginPage> {
               .map<BannerModel>((item) => BannerModel.fromJson(item))
               .toList();
 
-          setState(() {});
+          if(mounted)
+          {
+            setState(() {
+
+            });
+          }
         }
 
       }

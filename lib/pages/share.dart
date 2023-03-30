@@ -226,6 +226,7 @@ class SharePageState extends State<SharePage> {
     else {
       color = const Color(0xFF52A4DA);
     }
+    
     return color;
   }
 
@@ -445,7 +446,7 @@ class SharePageState extends State<SharePage> {
                                           Expanded(
                                             child: Container(
                                               decoration: BoxDecoration(
-                                                  color: Color(0xFF52A4DA),
+                                                  color: getColor(CsData.items[index].wr_6),
                                                   borderRadius: const BorderRadius.only(
                                                       bottomLeft: Radius.circular(4.0),
                                                       bottomRight: Radius.circular(4.0))),

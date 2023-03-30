@@ -28,6 +28,7 @@ import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uni_links/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -40,6 +41,8 @@ import 'firebase_options.dart';
 import 'models/apiResponse.dart';
 import 'pages/login_page.dart';
 import 'pages/news.dart';
+import 'pages/newsview.dart';
+import 'pages/noticeview.dart';
 import 'pages/popover.dart';
 import 'pages/profile_page.dart';
 
@@ -47,6 +50,7 @@ late SharedPreferences pref;
 late String? token;
 String appVer = '';
 int id = 0;
+bool _initialUriIsHandled = false;
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
@@ -68,6 +72,10 @@ int todaySteps = 0;
 const EventChannel stepDetectionChannel = EventChannel('step_detection');
 const stepCountChannel = EventChannel('step_count');
 late StreamSubscription _timerSubscription;
+
+StreamController<String> _stateController = StreamController();
+Stream<String> get state => _stateController.stream;
+Sink<String> get stateSink => _stateController.sink;
 
 //
 late Stream<StepCount> _stepCountStream;
@@ -132,7 +140,9 @@ void showFlutterNotification(RemoteMessage message) {
 
   SharedPreferences.getInstance().then((value) async {
     pref = value;
-    pref.setString('link', message.data.toString());
+
+    Map<String,dynamic> valueMap = Util.jsonStringToMap(message.data.toString());
+    pref.setString('link', valueMap['link']);
   });
 
   RemoteNotification? notification = message.notification;
@@ -207,7 +217,7 @@ Future<void> setupFlutterNotifications() async {
 
         if(jwtToken.isNotEmpty)
         {
-          app_token_update();
+          appTokenUpdate();
         }
       });
     }
@@ -220,7 +230,7 @@ Future<void> setupFlutterNotifications() async {
 
 }
 
-Future<void> app_token_update() async {
+Future<void> appTokenUpdate() async {
   String atDevice = '';
 
   var uuid = const Uuid();
@@ -436,7 +446,7 @@ Future<void> initializeService() async {
     notificationChannelId, // id
     '하루에 10,000 걸음 우리동네 SOS', // title
     description:
-    '업데이트중...', // description
+    '중', // description
     importance: Importance.low, // importance must be at low or higher level
     showBadge: false,
   );
@@ -481,7 +491,7 @@ Future<void> initializeService() async {
 
     flutterLocalNotificationsPlugin.show(
       888,
-      '$todaySteps 걸음',
+      '업데이트 중...',
       '하루에 10,000 걸음 우리동네 SOS v',
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -748,6 +758,13 @@ class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 0;
   NotiJwttokenEvent notiJwttokenEvent = NotiJwttokenEvent();
 
+  Uri? _initialUri;
+  Uri? _latestUri;
+
+  Object? _err;
+
+  StreamSubscription? _sub;
+
   PageController pageController = PageController(
     initialPage: 0,
     keepPage: true,
@@ -772,19 +789,22 @@ class _MyHomePageState extends State<MyHomePage> {
       // debugPrint('parts $parts');
       if(parts[1] != '')
       {
+        if(parts[0] == 'news') {
+          debugPrint(parts[1].toString());
 
-        // Navigator.of(context,rootNavigator: true).push(
-        //   MaterialPageRoute(builder: (context) =>
-        //       MovieViewPage(boTable: parts[1], wrId: parts[2],)),).then((value){
-        // });
+          Navigator.of(context, rootNavigator: true).push(
+              MaterialPageRoute(builder: (context) => NewsView(wrId: parts[1],))
+          );
+        }
+        else if(parts[0] == 'notice') {
+          Navigator.of(context, rootNavigator: true).push(
+              MaterialPageRoute(builder: (context) => NoticeView(wrId: parts[1],))
+          );
+        }
+
       }
     }
 
-    @override
-    Widget build(BuildContext context) {
-      // TODO: implement build
-      throw UnimplementedError();
-    }
 
   }
 
@@ -796,6 +816,9 @@ class _MyHomePageState extends State<MyHomePage> {
     GetIt.I.isRegistered<FormProvider>() ? null : GetIt.I.registerSingleton<FormProvider>(FormProvider(), signalsReady: true);
     // GetIt.I.isRegistered<LocationProvider>() ? null : GetIt.I.registerSingleton<LocationProvider>(LocationProvider(), signalsReady: true);
     notiJwttokenEvent.addListener(notiEventListener);
+
+    // _handleIncomingLinks();
+    _handleInitialUri();
 
     FirebaseMessaging.instance.getInitialMessage().then(
           (value) => setState(
@@ -814,13 +837,23 @@ class _MyHomePageState extends State<MyHomePage> {
 
               SharedPreferences.getInstance().then((value) async {
                 pref = value;
+                debugPrint('setString link $initialMessage');
                 pref.setString('link', initialMessage.toString());
               });
 
-              // Navigator.of(context,rootNavigator: true).push(
-              //   MaterialPageRoute(builder: (context) =>
-              //       MovieViewPage(boTable: parts[1], wrId: parts[2],)),).then((value){
-              // });
+              if(parts[0] == 'news') {
+                debugPrint(parts[1].toString());
+
+                Navigator.of(context, rootNavigator: true).push(
+                    MaterialPageRoute(builder: (context) => NewsView(wrId: parts[1],))
+                );
+              }
+              else if(parts[0] == 'notice') {
+                Navigator.of(context, rootNavigator: true).push(
+                    MaterialPageRoute(builder: (context) => NoticeView(wrId: parts[1],))
+                );
+              }
+
             }
           }
 
@@ -864,22 +897,29 @@ class _MyHomePageState extends State<MyHomePage> {
 
         String? link = pref.getString('link');
 
-        if(link != null)
+        if(link != null && link != "")
         {
           var parts = link?.split('/');
           pref.setString('link', '');
-
-          debugPrint('parts $parts');
+          debugPrint('perf parts : $parts');
 
           if(parts!.isNotEmpty)
           {
-            if(parts?[1] != '')
+            // debugPrint('aaaaa ${parts[1]} ${parts[0]}');
+            if(parts[1] != '')
             {
+              if(parts[0] == 'news') {
+                debugPrint(parts[1].toString());
 
-            }
-            else
-            {
-
+                Navigator.of(context, rootNavigator: true).push(
+                    MaterialPageRoute(builder: (context) => NewsView(wrId: parts[1],))
+                );
+              }
+              else if(parts[0] == 'notice') {
+                Navigator.of(context, rootNavigator: true).push(
+                    MaterialPageRoute(builder: (context) => NoticeView(wrId: parts[1],))
+                );
+              }
             }
 
           }
@@ -888,6 +928,122 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
   }
+
+
+  // void _handleIncomingLinks() {
+  //   if (!kIsWeb) {
+  //     // It will handle app links while the app is already started - be it in
+  //     // the foreground or in the background.
+  //     _sub = uriLinkStream.listen((Uri? uri) {
+  //       if (!mounted) return;
+  //
+  //       debugPrint('got uri: $uri');
+  //       setState(() {
+  //         _latestUri = uri;
+  //
+  //         final queryParams = _latestUri?.queryParametersAll.entries.toList();
+  //
+  //         for (final item in queryParams!)
+  //         {
+  //           debugPrint('query param: ${item.key} - ${item.value}');
+  //
+  //           if(item.key == "link")
+  //           {
+  //             var parts = item.key.split('/');
+  //
+  //             if(parts[0] == 'news') {
+  //               debugPrint(parts[1].toString());
+  //
+  //               Navigator.of(context, rootNavigator: true).push(
+  //                   MaterialPageRoute(builder: (context) => NewsView(wrId: parts[1],))
+  //               );
+  //             }
+  //             else if(parts[0] == 'notice') {
+  //               Navigator.of(context, rootNavigator: true).push(
+  //                   MaterialPageRoute(builder: (context) => NoticeView(wrId: parts[1],))
+  //               );
+  //             }
+  //
+  //           }
+  //         }
+  //
+  //         _err = null;
+  //       });
+  //     }, onError: (Object err) {
+  //       if (!mounted) return;
+  //       print('got err: $err');
+  //       setState(() {
+  //         _latestUri = null;
+  //         if (err is FormatException) {
+  //           _err = err;
+  //         } else {
+  //           _err = null;
+  //         }
+  //       });
+  //     });
+  //   }
+  // }
+
+  Future<void> _handleInitialUri() async {
+    // In this example app this is an almost useless guard, but it is here to
+    // show we are not going to call getInitialUri multiple times, even if this
+    // was a weidget that will be disposed of (ex. a navigation route change).
+    if (!_initialUriIsHandled) {
+      _initialUriIsHandled = true;
+      // _showSnackBar('_handleInitialUri called');
+      try {
+        final uri = await getInitialUri();
+        if (uri == null) {
+          debugPrint('no initial uri');
+        } else {
+          debugPrint('got initial uri: $uri');
+
+          final queryParams = uri?.queryParametersAll.entries.toList();
+
+          for (final item in queryParams!)
+          {
+            // debugPrint('query param: ${item.key} - ${item.value}');
+
+            if(item.key == "link")
+            {
+              String result = item.value.toString().replaceAll('[', "");
+              result = result.replaceAll(']', "");
+              var parts = result.split('/');
+
+              debugPrint('query param: $result - ${parts[0]} - ${parts[1]}');
+
+
+              if(parts[0] == 'news') {
+                debugPrint(parts[1].toString());
+
+                Navigator.of(context, rootNavigator: true).push(
+                    MaterialPageRoute(builder: (context) => NewsView(wrId: parts[1],) )
+
+                );
+              }
+              else if(parts[0] == 'notice') {
+                Navigator.of(context, rootNavigator: true).push(
+                    MaterialPageRoute(builder: (context) => NoticeView(wrId: parts[1],))
+                );
+              }
+
+            }
+          }
+        }
+        if (!mounted) return;
+
+        setState(() => _initialUri = uri);
+      } on PlatformException {
+        // Platform messages may fail but we ignore the exception
+        debugPrint('falied to get initial uri');
+      } on FormatException catch (err) {
+        if (!mounted) return;
+        debugPrint('malformed initial uri');
+        setState(() => _err = err);
+      }
+    }
+  }
+
 
   void notiEventListener() {
     // Current class name print
@@ -1034,7 +1190,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     // push 할때 클래스에 데이터를 실어서 보냄 arguments:Arguments(arg: "i'm argument")
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ConsultWrite()
+                      MaterialPageRoute(builder: (context) => const ConsultWrite()
                       ),
                     ).then((value) {
                       if (value != null) {
@@ -1197,6 +1353,7 @@ class _MyHomePageState extends State<MyHomePage> {
   {
     didReceiveLocalNotificationStream.close();
     selectNotificationStream.close();
+    // _sub?.cancel();
     pageController.dispose();
     notiJwttokenEvent.removeListener(notiEventListener);
 

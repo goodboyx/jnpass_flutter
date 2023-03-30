@@ -974,19 +974,6 @@ class WalkState extends State<Walk> {
                         text: const TextSpan(
                           children: [
                             TextSpan(
-                              text: "- 신규가입자 (1회): 20포인트",
-                              style: TextStyle(
-                                height: 1.5,
-                                color: Color(0xFF212529),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      RichText(
-                        text: const TextSpan(
-                          children: [
-                            TextSpan(
                               text: "- 동네소식 글 작성자 1건당 10포인트(하루 1회), 댓글 1건당 2포인트(하루 5회)",
                               style: TextStyle(
                                 height: 1.5,

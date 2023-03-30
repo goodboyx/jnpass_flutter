@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
@@ -9,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'package:jnpass/constants.dart';
 import 'package:jnpass/pages/news.dart';
 import 'package:jnpass/pages/newsview.dart';
-import 'package:jnpass/pages/share.dart';
 import 'package:jnpass/pages/walk.dart';
 import 'package:jnpass/provider/stepProvider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,7 +59,7 @@ class HomePageState extends State<HomePage> {
     provider.addListener(() {
       if(kDebug)
       {
-        debugPrint('provider.step ${step}');
+        debugPrint('provider.step $step');
       }
 
       if (mounted) {
@@ -255,7 +253,7 @@ class HomePageState extends State<HomePage> {
                             onTap: () {
                               Navigator.of(context,rootNavigator: true).push(
                                   MaterialPageRoute(builder: (context) =>
-                                      ConsultWrite())
+                                      const ConsultWrite())
                               );
                             }, // Image tapped
                             child: Image.asset(
@@ -278,7 +276,11 @@ class HomePageState extends State<HomePage> {
                               onTap: (){
                                 if(jwtToken.isEmpty)
                                 {
-                                  Navigator.pushReplacementNamed(context, '/login');
+                                  Navigator.of(context,rootNavigator: true).push(
+                                    MaterialPageRoute(builder: (context) =>
+                                    const LoginPage()),).then((value){
+
+                                  });
                                 }
                                 else
                                 {
@@ -289,29 +291,29 @@ class HomePageState extends State<HomePage> {
                                 }
                               },
                               child: Container(
-                              decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.all(Radius.circular(10))
+                                decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.all(Radius.circular(10))
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12.0,
+                                  vertical: 20.0,
+                                ),
+                                child:Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/step1.png',
+                                    ),
+                                    const Padding(padding: EdgeInsets.only(left: 15) ),
+                                    Text("탄소중립걷기챌린지 $step 걸음 ", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
+                                    const Expanded(child:
+                                            Align(alignment: Alignment.topRight,
+                                            child: Icon(Icons.arrow_forward_ios,)))
+                                  ]
+                                ),
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12.0,
-                                vertical: 20.0,
-                              ),
-                              child:Row(
-                                mainAxisSize: MainAxisSize.max,
-                                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Image.asset(
-                                    'assets/images/step1.png',
-                                  ),
-                                  const Padding(padding: EdgeInsets.only(left: 15) ),
-                                  Text("탄소중립걷기챌린지 $step 걸음 ", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
-                                  const Expanded(child:
-                                          Align(alignment: Alignment.topRight,
-                                          child: Icon(Icons.arrow_forward_ios,)))
-                                ]
-                              ),
-                            ),
                           ),
                           const SizedBox(height: 15),
                           Container(
@@ -352,6 +354,14 @@ class HomePageState extends State<HomePage> {
                                                           if(value =="reload")
                                                           {
                                                             dataConsult();
+                                                          }
+                                                          else if(value == "login")
+                                                          {
+                                                            Navigator.of(context,rootNavigator: true).push(
+                                                              MaterialPageRoute(builder: (context) =>
+                                                              const LoginPage()),).then((value){
+
+                                                            });
                                                           }
                                                   });
                                               },

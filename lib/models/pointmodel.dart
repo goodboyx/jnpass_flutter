@@ -18,9 +18,7 @@ class PointModel {
         this.mo_mb_money,
         this.mo_rel_table,
         this.mo_rel_id,
-        this.mo_rel_action,
-        this.total_count,
-        this.total_page);
+        this.mo_rel_action,);
 
   String mb_id;
   String mo_datetime;
@@ -32,8 +30,6 @@ class PointModel {
   String mo_rel_table;
   String mo_rel_id;
   String mo_rel_action;
-  int total_count;
-  int total_page;
 
   factory PointModel.fromJson(Map<String, dynamic> json) => _$PointModelFromJson(json);
 

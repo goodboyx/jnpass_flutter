@@ -53,8 +53,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '406099696497',
     projectId: 'flutterfire-e2e-tests',
     authDomain: 'flutterfire-e2e-tests.firebaseapp.com',
-    databaseURL:
-    'https://flutterfire-e2e-tests-default-rtdb.europe-west1.firebasedatabase.app',
+    databaseURL: 'https://flutterfire-e2e-tests-default-rtdb.asia-northeast3.firebasedatabase.app',
     storageBucket: 'flutterfire-e2e-tests.appspot.com',
     measurementId: 'G-JN95N1JV2E',
   );
@@ -64,6 +63,7 @@ class DefaultFirebaseOptions {
     appId: '1:654239745338:android:90c770bea5d01d4fc97c03',
     messagingSenderId: '654239745338',
     projectId: 'ictwork-805e9',
+    // databaseURL: 'https://ictwork-805e9.asia-northeast3.firebaseio.com',
     databaseURL: 'https://ictwork-805e9.firebaseio.com',
     storageBucket: 'ictwork-805e9.appspot.com',
   );
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     appId: '1:654239745338:ios:3719598de34809b9c97c03',
     messagingSenderId: '654239745338',
     projectId: 'ictwork-805e9',
-    databaseURL: 'https://ictwork-805e9.firebaseio.com',
+    databaseURL: 'https://ictwork-805e9.asia-northeast3.firebaseio.com',
     storageBucket: 'ictwork-805e9.appspot.com',
     androidClientId:
     '654239745338-fvjql7pdfgt5trnioi5063g30pi16ldg.apps.googleusercontent.com',
