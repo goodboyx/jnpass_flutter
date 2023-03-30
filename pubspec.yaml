@@ -37,6 +37,8 @@ dependencies:
   cupertino_icons: ^1.0.5
   flutter_native_splash: ^2.2.19
   shared_preferences: ^2.0.18
+  flutter_speed_dial: ^6.2.0
+  uni_links: ^0.5.1
   font_awesome_flutter: ^10.4.0
   flutter_timezone: ^1.0.4
   google_fonts: ^3.0.1
@@ -54,6 +56,9 @@ dependencies:
   fluttertoast: ^8.2.1
   image_picker: ^0.8.7
   package_info_plus: ^3.0.3
+  flutter_exif_rotation: ^0.5.1
+  cloud_firestore: ^4.4.5
+  firebase_database: ^10.0.16
   android_intent_plus: ^3.1.6
   share_plus: ^4.4.0
   hive : ^2.2.3
@@ -114,6 +119,7 @@ flutter:
   assets:
     - assets/images/splash.png
     - assets/images/icon_sos.png
+    - assets/images/cert.png
     - assets/images/banner1.png
     - assets/images/banner2.png
     - assets/images/banner3.png
