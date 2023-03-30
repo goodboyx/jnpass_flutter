@@ -1,29 +1,20 @@
-import 'dart:math';
-
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:location/location.dart';
-import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
-
+import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:multi_image_picker2/multi_image_picker2.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/jsonapi.dart';
 import '../constants.dart';
 import '../models/apiResponse.dart';
 import '../widgets/google_map.dart';
-import 'login_page.dart';
 
-// ignore: must_be_immutable
 class ConsultWrite extends StatefulWidget {
 
   const ConsultWrite({Key? key})
@@ -38,10 +29,8 @@ class ConsultWriteState extends State<ConsultWrite> {
   late SharedPreferences prefs;
   String jwtToken = '';
 
-  List<Asset> imageList = <Asset>[];
   LocationData? _location;
   String? _error;
-
   int _count = 0;        // 이미지 갯수
   int _locChk = 0;       // 장소제공 허용여부
   final TextEditingController nameController = TextEditingController();
@@ -53,6 +42,10 @@ class ConsultWriteState extends State<ConsultWrite> {
   bool writeState = false;
   String? lat = '';
   String? log = '';
+
+  List<XFile> imageList = [];
+  final ImagePicker _picker = ImagePicker();
+
 
   @override
   void initState () {
@@ -171,7 +164,7 @@ class ConsultWriteState extends State<ConsultWrite> {
                                     padding: const EdgeInsets.all(15.0),
                                     child: TextButton.icon(
                                       onPressed: () => {
-                                        loadAssets()
+                                        _showBottomSheet()
                                       },
                                       icon: Column(
                                         children: [
@@ -208,91 +201,70 @@ class ConsultWriteState extends State<ConsultWrite> {
                                   ),
                                   Expanded( child:
                                   imageList.isEmpty
-                                      ? Container()
-                                      : SizedBox(
-                                    height: 104,
-                                    width: MediaQuery.of(context).size.width,
-                                    child: ListView.builder(
-                                        padding: const EdgeInsets.only(top: 2),
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: imageList.length,
-                                        itemBuilder: (BuildContext context, int index) {
-                                          Asset asset = imageList[index];
+                                        ? Container()
+                                        : SizedBox(
+                                      height: 104,
+                                      width: MediaQuery.of(context).size.width,
+                                      child: ListView.builder(
+                                          padding: const EdgeInsets.only(top: 2),
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: imageList.length,
+                                          itemBuilder: (BuildContext context, int index) {
 
-                                          return Card(
-                                              elevation: 3,
-                                              shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(15)),
-                                              child: Stack(
-                                                  children: [
-                                                    AssetThumb(asset: asset, width: 300, height: 300),
-                                                    Positioned(
-                                                      top: 0,
-                                                      right: 0,
-                                                      child: GestureDetector(
-                                                        onTap: (){
-                                                          _showMyDialog(index);
-                                                        },
-                                                        child: const Icon(
-                                                          Icons.delete,
-                                                          color: Colors.red,
+                                            return Card(
+                                                elevation: 3,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(5)),
+                                                child: Stack(
+                                                    children: [
+                                                      Container(
+                                                        width: 70.0,
+                                                        height: 90.0,
+                                                        padding: const EdgeInsets.only(top: 5),
+                                                        child: ClipRRect(
+                                                          borderRadius: BorderRadius.circular(0.0),
+                                                          child: FadeInImage(
+                                                            placeholder: const AssetImage("assets/images/profile.png"),
+                                                            image: FileImage(File(imageList[index].path)),
+                                                            imageErrorBuilder:
+                                                                (context, error, stackTrace) {
+                                                              return Image.asset(
+                                                                  'assets/images/profile.png',
+                                                                  fit: BoxFit.fitWidth);
+                                                            },
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    Container(
-                                                      decoration: const BoxDecoration(
-                                                        color: Colors.transparent,
+                                                      Positioned(
+                                                        top: 0,
+                                                        right: 0,
+                                                        child: GestureDetector(
+                                                          onTap: (){
+                                                            _showMyDialog(index);
+                                                          },
+                                                          child: const Icon(
+                                                            Icons.delete,
+                                                            color: Colors.red,
+                                                          ),
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ]
-                                              )
-                                          );
-                                        }),
-                                  ),
+                                                      Container(
+                                                        decoration: const BoxDecoration(
+                                                          color: Colors.transparent,
+                                                        ),
+                                                      ),
+                                                    ]
+                                                )
+                                            );
+                                          }),
+                                    ),
                                   ),
                                 ]
                             ),
 
                           ],
                         ),
-                        // 카테고리 선택
-                        // Column(
-                        //     crossAxisAlignment : CrossAxisAlignment.start,
-                        //     children: <Widget> [
-                        //       Container(
-                        //         margin: const EdgeInsets.only(left: 15.0, bottom: 15.0, top: 0, right: 15.0),
-                        //         child: InputDecorator(
-                        //           decoration: InputDecoration(
-                        //             border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0)),
-                        //             contentPadding: const EdgeInsets.all(10),
-                        //           ),
-                        //           child: DropdownButtonHideUnderline(
-                        //             child: DropdownButton<String>(
-                        //               value: currentSelectedValue,
-                        //               isDense: true,
-                        //               isExpanded: true,
-                        //               items: <String>['0', '1', '2']
-                        //                   .map<DropdownMenuItem<String>>((String value) {
-                        //                 return DropdownMenuItem<String>(
-                        //                   value: value,
-                        //                   child: Text({'0': '카테고리선택','1': '생활불편', '2': '위기사항'}[value] ?? '카테고리 선택'),
-                        //                 );
-                        //               }).toList(),
-                        //               onChanged: (String? newValue) {
-                        //                 setState(() {
-                        //                   currentSelectedValue = newValue!;
-                        //                   // print(currentSelectedValue);
-                        //                 });
-                        //               },
-                        //               hint: const Text("카테고리 선택"),
-                        //
-                        //             ),
-                        //           ),
-                        //         ),
-                        //       ),
-                        //     ]
-                        // ),
-                        // 이름
+
                         (jwtToken.isEmpty)
                         ?
                         Column(
@@ -463,23 +435,120 @@ class ConsultWriteState extends State<ConsultWrite> {
 
   }
 
+  _showBottomSheet() {
+    return showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(25),
+        ),
+      ),
+      builder: (context) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(5.0, 5.0, 5.0, 5.0),
+              child: TextButton.icon(
+                icon: const Icon(Icons.camera_alt),
+                onPressed: () {
+                  _getCameraImage();
+                },
+                style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    elevation: 2,
+                    backgroundColor: const Color(0XFF98BF54)),
+                label: const Text(
+                  '사진찍기',
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(5.0, 5.0, 5.0, 5.0),
+              child: TextButton.icon(
+                icon: const Icon(Icons.photo_library),
+                onPressed: () {
+                  _getPhotoLibraryImage();
+                },
+                style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    elevation: 2,
+                    backgroundColor: const Color(0XFF52A4DA)),
+                label: const Text('사진 불러오기',
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                ),
+              ),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  // 사진 찍기
+  _getCameraImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      File rotatedImage = await FlutterExifRotation.rotateAndSaveImage(path: pickedFile!.path);
+
+      setState(() {
+        imageList.add(XFile(rotatedImage.path));
+        _count = imageList.length;
+      });
+
+    } else {
+      debugPrint('이미지 선택안함');
+    }
+  }
+
+  // 사진 라이브러리 가져오기
+  _getPhotoLibraryImage() async {
+    final List<XFile>? images = await _picker.pickMultiImage();
+    if (images != null) {
+      setState(() {
+        imageList += images;
+        _count = imageList.length;
+      });
+    }
+  }
+
   // 등록완료
   Future<bool> uploadAction() async {
 
-    // if(currentSelectedValue == null)
-    // {
-    //   Fluttertoast.showToast(
-    //       msg: "카테고리를 선택해주세요" ,
-    //       toastLength: Toast.LENGTH_LONG,
-    //       gravity: ToastGravity.BOTTOM,
-    //       timeInSecForIosWeb: 1,
-    //       backgroundColor: Colors.red,
-    //       textColor: Colors.white,
-    //       fontSize: 13.0
-    //   );
-    //
-    //   return false;
-    // }
+    if(jwtToken.isEmpty)
+    {
+      if(nameController.text == "")
+      {
+        Fluttertoast.showToast(
+            msg: "이름을 등록해주세요" ,
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 13.0
+        );
+
+        return false;
+      }
+
+      if(hpCcontroller.text == "")
+      {
+        Fluttertoast.showToast(
+            msg: "전화번호을 등록해주세요" ,
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 13.0
+        );
+
+        return false;
+      }
+    }
 
     setState(() {
       writeState = true;
@@ -501,29 +570,7 @@ class ConsultWriteState extends State<ConsultWrite> {
     request.fields["wr_content"] = await json.decode(json.encode(_controller.text));
 
     for (int i = 0; i < imageList.length; i++) {
-
-      final tempFile = await getFileFromAsset(imageList[i]);
-
-      /*
-      final byteData = await imageList[i].getByteData();
-      Directory? motherDirectory = await getExternalStorageDirectory();
-      Directory dummyDirectory
-      await Directory('${motherDirectory?.path}/dummy')
-          .create(recursive: true);
-
-      File convertedFile = File(
-        '${dummyDirectory.path}/${DateTime.now()}',
-      );
-
-      var bytes = await imageList[i].getByteData();
-      await convertedFile.writeAsBytes(bytes.buffer.asUint8List());
-      */
-
-      // final _filePath = (await getTemporaryDirectory()).path + '/' + imageList[i].name;
-      // print('${dir.absolute.path}/${imageList[i].name}');
-
-      var pic = await http.MultipartFile.fromPath("bf_file[]", tempFile.path);
-      // var pic = await http.MultipartFile.fromBytes("bf_file", tempFile.readAsBytesSync());
+      var pic = await http.MultipartFile.fromPath("bf_file[]", imageList[i].path);
       request.files.add(pic);
     }
 
@@ -541,8 +588,6 @@ class ConsultWriteState extends State<ConsultWrite> {
 
       if(responseData['code'].toString() == "0")
       {
-        connect(responseData['wr_id'].toString());
-
         // ignore: use_build_context_synchronously
         Navigator.pop(_context, responseData);
       }
@@ -570,66 +615,6 @@ class ConsultWriteState extends State<ConsultWrite> {
     return true;
   }
 
-  // 사진첩 가져오기
-  Future<void> loadAssets() async {
-    List<Asset> resultList = <Asset>[];
-    String error = '';
-
-    try {
-      resultList = await MultiImagePicker.pickImages(
-        maxImages: 10,
-        enableCamera: true,
-        selectedAssets: imageList,
-        cupertinoOptions: const CupertinoOptions(
-          takePhotoIcon: "chat",
-          doneButtonTitle: "등록",
-          // autoCloseOnSelectionLimit:false,  //선택 제한에 도달하는 즉시 이미지 선택기가 닫힙니다.
-        ),
-        materialOptions: const MaterialOptions(
-          actionBarColor: "#000000",
-          // actionBarTitleColor: "#FFFFFF",
-          actionBarTitle: "사진 가져오기",
-          allViewTitle: "전체",
-          useDetailsView: false,
-          selectCircleStrokeColor: "#000000",
-        ),
-      );
-    } on Exception catch (e) {
-      error = e.toString();
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      if(resultList.isNotEmpty) {
-        imageList = resultList;
-      }
-
-      error = error;
-      _count = imageList.length;
-    });
-  }
-
-  Future<File> getFileFromAsset(Asset asset) async {
-    ByteData byteData = await asset.getThumbByteData(asset.originalWidth!, asset.originalHeight!, quality: 100);
-
-    // String _name = TextMode.trimTextAfterLastSpecialCharacter(asset.name, '.');
-
-    String name = asset.name.toString();
-
-    // print('asset name is : ${asset.name}');
-
-    final tempFile = File('${(await getTemporaryDirectory()).path}/$name');
-    await tempFile.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    await tempFile.create(recursive: true);
-
-    File file = tempFile;
-
-    return file;
-  }
 
   // 이미지 삭제 경고창
   Future<void> _showMyDialog(int index) async {
@@ -674,43 +659,6 @@ class ConsultWriteState extends State<ConsultWrite> {
     );
   }
 
-  Future<MqttServerClient> connect(String wrId) async {
-    Random random = Random();
-
-    // print('app_' + (random.nextInt(90) * 10).toString());
-
-    MqttServerClient client =
-    MqttServerClient.withPort('driver.cloudmqtt.com', 'app_${random.nextInt(10000) * 100}' , 18749);
-
-    client.logging(on: true);
-    client.onConnected = onConnected;
-    client.onDisconnected = onDisconnected;
-
-    try {
-      await client.connect('ccsfssyj', '-UJ0-kP8Wr8h');
-    } catch (e) {
-      // print('mqtt Exception: $e');
-      client.disconnect();
-    }
-
-    const pubTopic = 'notice';
-    final builder = MqttClientPayloadBuilder();
-    builder.addString('new@@write@@$wrId');
-
-    client.publishMessage(pubTopic, MqttQos.atLeastOnce, builder.payload!);
-
-    client.disconnect();
-    return client;
-  }
-
-  void onConnected() {
-    // print('Connected');
-  }
-
-  void onDisconnected()
-  {
-    // print('Disconnected');
-  }
 
   @override
   void dispose() {

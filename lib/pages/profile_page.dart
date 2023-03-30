@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -13,8 +14,6 @@ import 'package:jnpass/pages/block_page.dart';
 import 'package:jnpass/pages/location.dart';
 import 'package:jnpass/pages/notice_page.dart';
 import 'package:jnpass/pages/userpage.dart';
-import 'package:multi_image_picker2/multi_image_picker2.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/jsonapi.dart';
@@ -23,6 +22,7 @@ import '../constants.dart';
 import '../models/apiResponse.dart';
 import '../util.dart';
 import '../widgets/profile_list_item.dart';
+import 'cert_page.dart';
 import 'login_page.dart';
 
 GetIt getIt = GetIt.instance;
@@ -79,7 +79,7 @@ class ProfilePageState extends State<ProfilePage> {
             mbData = responseData['data'];
             mb_nick = mbData['mb_nick'];
             textEditingController.text = mb_nick;
-            mbImg = '${mbImgUrl}/${mbData['mb_id']}/${mbData['mb_img']}';
+            mbImg = '$mbImgUrl/${mbData['mb_id']}/${mbData['mb_img']}';
 
             reloadData();
             setState(() {
@@ -264,6 +264,27 @@ class ProfilePageState extends State<ProfilePage> {
                                     backgroundImage: AssetImage("assets/images/profile.png")
                                 )
                                 ,
+
+                                Positioned(
+                                  right: 60,
+                                  bottom: 10,
+                                  child: SizedBox(
+                                    height: 100,
+                                    width: 100,
+                                    child: TextButton(
+                                      onPressed: () {
+                                        debugPrint('ssss');
+
+                                        Navigator.of(context, rootNavigator: true).push(
+                                            MaterialPageRoute(builder: (context) => const CertPage())
+                                        );
+
+                                      },
+                                      child: Image.asset("assets/images/cert.png", fit:BoxFit.fitWidth, colorBlendMode: BlendMode.darken),
+                                    ),
+                                  ),
+                                ),
+
                                 (profileUpdate == true)
                                     ?
                                 Positioned(
@@ -281,7 +302,6 @@ class ProfilePageState extends State<ProfilePage> {
                                         backgroundColor: const Color(0xFFF5F6F9),
                                       ),
                                       onPressed: () {
-                                        // loadAssets();
                                         _showBottomSheet();
                                       },
                                       child: SvgPicture.asset("assets/images/icon_camera.svg"),
@@ -289,7 +309,7 @@ class ProfilePageState extends State<ProfilePage> {
                                   ),
                                 )
                                     :
-                                Container()
+                                Container(),
                               ]
                           )
                       ),
@@ -299,7 +319,7 @@ class ProfilePageState extends State<ProfilePage> {
                       (profileUpdate == false)
                           ?
                       // mb_nick.isEmpty ? Container() : Text('${mb_nick} (${mb.gr_subject})')
-                      mb_nick.isEmpty ? Container() : Text('${mb_nick} (${mbData['gr_subject']})')
+                      mb_nick.isEmpty ? Container() : Text('$mb_nick (${mbData['gr_subject']})')
                           :
                       Container(
                           margin: const EdgeInsets.only(top:5),
@@ -354,7 +374,7 @@ class ProfilePageState extends State<ProfilePage> {
                         },
                         height: 34.0,
                         minWidth: 100.0,
-                        color: Colors.blue,
+                        color: kColor,
                         child: const Text(
                           "프로필수정",
                           style: TextStyle(color: Colors.white, fontSize: 13.0),
@@ -596,14 +616,16 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   _getCameraImage() async {
-    final pickedFile =
-    await ImagePicker().pickImage(source: ImageSource.camera);
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
+      File rotatedImage = await FlutterExifRotation.rotateAndSaveImage(path: pickedFile!.path);
+
       setState(() {
-        _pickedFile = pickedFile;
+        _pickedFile = XFile(rotatedImage.path);
       });
+
     } else {
-      print('이미지 선택안함');
+      debugPrint('이미지 선택안함');
     }
   }
 
@@ -611,9 +633,13 @@ class ProfilePageState extends State<ProfilePage> {
     final pickedFile =
     await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+
+      File rotatedImage = await FlutterExifRotation.rotateAndSaveImage(path: pickedFile!.path);
+
       setState(() {
-        _pickedFile = pickedFile;
+        _pickedFile = XFile(rotatedImage.path);
       });
+
     } else {
       debugPrint('이미지 선택안함');
     }
@@ -629,7 +655,7 @@ class ProfilePageState extends State<ProfilePage> {
     // var pic = await http.MultipartFile.fromBytes("bf_file", tempFile.readAsBytesSync());
     request.files.add(pic);
 
-    request.fields["jwt_token"]    = jwtToken;
+    request.fields["jwt_token"]  = jwtToken;
     request.fields["mb_nick"]    = textEditingController.text;
 
     var res = await request.send();
@@ -686,7 +712,7 @@ class ProfilePageState extends State<ProfilePage> {
           content: SingleChildScrollView(
             child: Column(
               children: const <Widget>[
-                Text('탈퇴를 하시겠습니까?'),
+                Text('탈퇴를 하시겠습니까? 탈퇴시 회원포인트은 삭제가 됩니다.'),
                 // Text('Would you like to approve of this message?'),
               ],
             ),
@@ -696,39 +722,55 @@ class ProfilePageState extends State<ProfilePage> {
               child: const Text('확인'),
               onPressed: () async {
 
-                // Navigator.of(context).pop();
+                final parameters = {"jwt_token": jwtToken};
+                JsonApi.postApi("rest/delete/member", parameters).then((value) {
+                  ApiResponse apiResponse = ApiResponse();
 
-                Uri url = Uri.parse('${appApiUrl}app_member_leave.php?app_token=$token&mb_id=${mbData['mb_id']}');
-                // print(url);
+                  apiResponse = value;
 
-                var response = await http.get(url);
-                var responseBody = response.body;
+                  if((apiResponse.apiError).error == "9") {
 
-                final responseData = json.decode(responseBody); // json 응답 값을 decode
+                    final responseData = json.decode(apiResponse.data.toString());
+                    debugPrint('data ${apiResponse.data}');
 
-                if(responseData['msg'] != null)
-                {
-                  Fluttertoast.showToast(
-                      msg: responseData['msg'],
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.BOTTOM,
-                      timeInSecForIosWeb: 1,
-                      backgroundColor: Colors.red,
-                      textColor: Colors.white,
-                      fontSize: 13.0
-                  );
-                }
-                else
-                {
-                  prefs.setString('mb_id', '');
 
-                  // ignore: use_build_context_synchronously
-                  Navigator.of(context, rootNavigator: true).push(
-                    MaterialPageRoute(builder: (context) =>
-                    const LoginPage()),);
-                }
+                    if(responseData['code'].toString() == "0") {
+                      if(responseData['message'] != '')
+                      {
+                        Fluttertoast.showToast(
+                            msg: responseData['message'],
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                            fontSize: 13.0
+                        );
+                      }
 
-                // debugPrint('state_type : ${responseData['state_type'].toString()} ');
+                      Navigator.pop(context);
+                      prefs.remove('jwt_token');
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                      );
+                    }
+                  }
+                  else
+                  {
+                    Fluttertoast.showToast(
+                        msg: (apiResponse.apiError).msg,
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM,
+                        timeInSecForIosWeb: 1,
+                        backgroundColor: Colors.red,
+                        textColor: Colors.white,
+                        fontSize: 13.0
+                    );
+                  }
+
+                });
+
 
               },
             ),
@@ -792,21 +834,6 @@ class ProfilePageState extends State<ProfilePage> {
 
     });
   }
-
-  Future<File> getFileFromAsset(Asset asset) async {
-    ByteData byteData = await asset.getThumbByteData(asset.originalWidth!, asset.originalHeight!, quality: 100);
-
-    String name = asset.name.toString();
-
-    final tempFile = File('${(await getTemporaryDirectory()).path}/$name');
-    await tempFile.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    await tempFile.create(recursive: true);
-
-    File file = tempFile;
-
-    return file;
-  }
-
 
 
   @override
