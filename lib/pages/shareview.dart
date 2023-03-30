@@ -1,38 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:jnpass/pages/singo.dart';
-import 'package:jnpass/pages/userprofile.dart';
-import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
-import 'package:multi_image_picker2/multi_image_picker2.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path_provider/path_provider.dart';
 import '../widgets/google_map.dart';
-
-import '../chat_provider.dart';
-import '../constants.dart';
 import '../api/jsonapi.dart';
-import '../models/apiError.dart';
 import '../models/apiResponse.dart';
 import '../models/bannermodel.dart';
 import '../models/boardmodel.dart';
-import '../models/commentmodel.dart';
-import '../models/member.dart';
-import '../resultForm.dart';
-import '../util.dart';
-import '../visitForm.dart';
-import '../widgets/google_map.dart';
-import 'login_page.dart';
 
 // ignore: must_be_immutable
 class ShareView extends StatefulWidget {
@@ -104,13 +83,19 @@ class ShareViewState extends State<ShareView> {
 
         if(boardData['code'].toString() == '0')
         {
-          isLoading = true;
+          if(boardData['wr_6'] == "")
+          {
+            boardData['wr_6'] = "1";
+          }
+
+          setState(() {
+            currentStep = int.parse(boardData['wr_6'])-1 ?? 0;
+            isLoading = true;
+          });
+
+          debugPrint('currentStep ${currentStep}');
+
         }
-
-        setState(() {
-
-        });
-
       }
       else
       {
@@ -309,28 +294,55 @@ class ShareViewState extends State<ShareView> {
                                   boardData['wr_content'].toString(), textAlign: TextAlign.left,
                                   style: const TextStyle(
                                       color: Colors.black, fontSize: 16),),
-
+                              ),
+                              const SizedBox(height: 10,),
+                              (boardData['wr_2'].toString() == "1")
+                                  ?
+                              Container(
+                                margin: const EdgeInsets.only(left: 15.0, bottom: 15.0, top: 0, right: 15.0),
+                                // Text('Gender:'),
+                                child: InputDecorator(
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0)),
+                                      contentPadding: const EdgeInsets.all(10),
+                                    ),
+                                    child: GoogleMapWidget(lat: boardData['wr_3'].toString(), lng: boardData['wr_4'].toString(), myLocationEnabled: false,)
+                                ),
                               )
+                                  :
+                              const SizedBox(height: 20,),
+                              (boardData['wr_6'].toString() == "3")
+                              ?
+                              Container(
+                                padding: const EdgeInsets.all(10.0),
+                                color: const Color(0xFFC1C1C1),
+                                alignment: Alignment.topLeft,
+                                child: const Text('답변', textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16),),
+                              )
+                              :
+                              const SizedBox(height: 0,),
+                              (boardData['wr_6'].toString() == "3")
+                              ?
+                              Container(
+                                // padding: const EdgeInsets.all(10.0),
+                                alignment: Alignment.topLeft,
+                                margin: const EdgeInsets.only(left: 10.0,
+                                    bottom: 15.0,
+                                    top: 10.0,
+                                    right: 15.0),
+                                child: Text(boardData['wr_8'].toString(), textAlign: TextAlign.left,
+                                  style: const TextStyle(
+                                      color: Colors.black, fontSize: 16),),
+                              )
+                              :
+                              const SizedBox(height: 0,),
                             ]
                         )
                         ,
                       ),
-                      const SizedBox(height: 10,),
-                      (boardData['wr_2'].toString() == "1")
-                      ?
-                      Container(
-                        margin: const EdgeInsets.only(left: 15.0, bottom: 15.0, top: 0, right: 15.0),
-                        // Text('Gender:'),
-                        child: InputDecorator(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0)),
-                              contentPadding: const EdgeInsets.all(10),
-                            ),
-                            child: GoogleMapWidget(lat: boardData['wr_3'].toString(), lng: boardData['wr_4'].toString(), myLocationEnabled: false,)
-                        ),
-                      )
-                      :
-                      const SizedBox(),
+
                     ]
                 ),
 
