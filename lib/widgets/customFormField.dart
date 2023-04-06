@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../constants.dart';
-import '../models/notiEvent.dart';
+import '../provider/notiEvent.dart';
 
 class CustomFormField extends StatelessWidget {
   CustomFormField({
