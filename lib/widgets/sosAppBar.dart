@@ -6,7 +6,7 @@ import 'package:jnpass/provider/locationProvider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../common.dart';
 import '../constants.dart';
-import '../models/notiEvent.dart';
+import '../provider/notiEvent.dart';
 import '../pages/consult_page.dart';
 import '../pages/share.dart';
 

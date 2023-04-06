@@ -11,7 +11,7 @@ import '../common.dart';
 import '../constants.dart';
 import '../models/apiResponse.dart';
 import '../models/boardcategory.dart';
-import '../models/notiEvent.dart';
+import '../provider/notiEvent.dart';
 import '../util.dart';
 import '../widgets/sosAppBar.dart';
 import '../models/boardmodel.dart';

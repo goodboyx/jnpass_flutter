@@ -18,7 +18,7 @@ import '../api/jsonapi.dart';
 import '../models/apiError.dart';
 import '../models/apiResponse.dart';
 import '../models/memberGroup.dart';
-import '../models/notiEvent.dart';
+import '../provider/notiEvent.dart';
 import '../provider/formProvider.dart';
 import '../widgets/customFormField.dart';
 import 'package:http/http.dart' as http;
