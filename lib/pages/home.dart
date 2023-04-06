@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:jnpass/constants.dart';
 import 'package:jnpass/pages/news.dart';
@@ -34,7 +33,7 @@ class HomePageState extends State<HomePage> {
   late SharedPreferences prefs;
   final ScrollController scrollController = ScrollController();
   late String step = '0';
-  final provider = GetIt.I.get<StepProvider>();
+  StepProvider stepProvider = StepProvider();
   bool isLoading = false;
 
   @override
@@ -56,128 +55,12 @@ class HomePageState extends State<HomePage> {
       dataConsult();
     });
 
-    provider.addListener(() {
-      if(kDebug)
-      {
-        debugPrint('provider.step $step');
-      }
-
-      if (mounted) {
-        setState(() {
-          step = f.format(provider.getStep());
-        });
-      }
-    });
+    stepProvider.addListener(stepEventListener);
 
     dataAdSlide();
 
     super.initState();
   }
-
-  //상단 이미지 배너
-  void dataAdSlide() {
-    // BannerData.items.clear();
-
-    final parameters = {"": ""};
-    JsonApi.getApi("rest/banner", parameters).then((value) {
-      ApiResponse apiResponse = ApiResponse();
-
-      apiResponse = value;
-
-      if((apiResponse.apiError).error == "9") {
-
-        final responseData = json.decode(apiResponse.data.toString());
-        if(kDebug)
-        {
-          debugPrint('data ${apiResponse.data}');
-        }
-
-        if(responseData['code'].toString() == "0")
-        {
-          BannerData.items = List.from(responseData['items'])
-              .map<BannerModel>((item) => BannerModel.fromJson(item))
-              .toList();
-
-          if(mounted)
-          {
-            setState(() {
-
-            });
-          }
-        }
-
-      }
-      else
-      {
-        Fluttertoast.showToast(
-            msg: (apiResponse.apiError).msg,
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 13.0
-        );
-      }
-
-    });
-
-  }
-
-  // 동네소식
-  void dataConsult() {
-    BoardData.items.clear();
-
-    final parameters = {"page": "1", "limit": "4", "jwt_token":jwtToken};
-    JsonApi.getApi("rest/board/news", parameters).then((value) {
-      ApiResponse apiResponse = ApiResponse();
-
-      apiResponse = value;
-
-      if((apiResponse.apiError).error == "9") {
-
-        final responseData = json.decode(apiResponse.data.toString());
-        if(kDebug)
-        {
-          debugPrint('data ${apiResponse.data}');
-        }
-
-        if(responseData['code'].toString() == "0")
-        {
-          if(List.from(responseData['items']).toList().isNotEmpty)
-          {
-            BoardData.items = List.from(responseData['items'])
-                .map<BoardModel>((item) => BoardModel.fromJson(item))
-                .toList();
-
-            if(mounted)
-            {
-              setState(() {
-                isLoading = true;
-              });
-            }
-
-          }
-        }
-      }
-      else
-      {
-        Fluttertoast.showToast(
-            msg: (apiResponse.apiError).msg,
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 13.0
-        );
-      }
-
-    });
-
-
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -307,7 +190,7 @@ class HomePageState extends State<HomePage> {
                                       'assets/images/step1.png',
                                     ),
                                     const Padding(padding: EdgeInsets.only(left: 15) ),
-                                    Text("탄소중립걷기챌린지 $step 걸음 ", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
+                                    Text("탄소중립걷기 $step 걸음 ", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
                                     const Expanded(child:
                                             Align(alignment: Alignment.topRight,
                                             child: Icon(Icons.arrow_forward_ios,)))
@@ -537,10 +420,127 @@ class HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    stepProvider.removeListener(stepEventListener);
     super.dispose();
   }
 
+  //상단 이미지 배너
+  void dataAdSlide() {
+    // BannerData.items.clear();
+
+    final parameters = {"": ""};
+    JsonApi.getApi("rest/banner", parameters).then((value) {
+      ApiResponse apiResponse = ApiResponse();
+
+      apiResponse = value;
+
+      if((apiResponse.apiError).error == "9") {
+
+        final responseData = json.decode(apiResponse.data.toString());
+        if(kDebug)
+        {
+          debugPrint('data ${apiResponse.data}');
+        }
+
+        if(responseData['code'].toString() == "0")
+        {
+          BannerData.items = List.from(responseData['items'])
+              .map<BannerModel>((item) => BannerModel.fromJson(item))
+              .toList();
+
+          if(mounted)
+          {
+            setState(() {
+
+            });
+          }
+        }
+
+      }
+      else
+      {
+        Fluttertoast.showToast(
+            msg: (apiResponse.apiError).msg,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 13.0
+        );
+      }
+
+    });
+
+  }
+
+  // 동네소식
+  void dataConsult() {
+    BoardData.items.clear();
+
+    final parameters = {"page": "1", "limit": "4", "jwt_token":jwtToken};
+    JsonApi.getApi("rest/board/news", parameters).then((value) {
+      ApiResponse apiResponse = ApiResponse();
+
+      apiResponse = value;
+
+      if((apiResponse.apiError).error == "9") {
+
+        final responseData = json.decode(apiResponse.data.toString());
+        if(kDebug)
+        {
+          debugPrint('data ${apiResponse.data}');
+        }
+
+        if(responseData['code'].toString() == "0")
+        {
+          if(List.from(responseData['items']).toList().isNotEmpty)
+          {
+            BoardData.items = List.from(responseData['items'])
+                .map<BoardModel>((item) => BoardModel.fromJson(item))
+                .toList();
+
+            if(mounted)
+            {
+              setState(() {
+                isLoading = true;
+              });
+            }
+
+          }
+        }
+      }
+      else
+      {
+        Fluttertoast.showToast(
+            msg: (apiResponse.apiError).msg,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 13.0
+        );
+      }
+
+    });
 
 
+  }
+
+  // provider 걸음수 함수
+  void stepEventListener() {
+    // Current class name print
+    // if (mounted) {
+    // if(kDebug)
+    // {
+      debugPrint('home step ${stepProvider.getStep()}');
+    // }
+    var f = NumberFormat('###,###,###,###');
+
+    setState(() {
+      step = f.format(stepProvider.getStep());
+    });
+  }
 }
 
