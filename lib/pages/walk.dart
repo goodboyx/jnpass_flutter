@@ -5,12 +5,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:jnpass/constants.dart';
 import 'package:jnpass/provider/stepProvider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../api/jsonapi.dart';
 import '../models/apiResponse.dart';
 import '../models/pointmodel.dart';
@@ -18,7 +18,6 @@ import 'login_page.dart';
 
 String selected = "0";
 int point = 0;
-GetIt getIt = GetIt.instance;
 
 class Walk extends StatefulWidget {
 
@@ -31,7 +30,7 @@ class Walk extends StatefulWidget {
 class WalkState extends State<Walk> {
   late final prefs;
   String jwtToken = '';
-  final provider = getIt.get<StepProvider>();
+  StepProvider stepProvider = StepProvider();
   late Future<List<dynamic>> cateData;
   late String step = '0';
   late String step_nocomma = '0';
@@ -67,16 +66,7 @@ class WalkState extends State<Walk> {
 
     });
 
-    provider.addListener(() {
-      debugPrint('provider.step2 : $step');
-
-      if (mounted) {
-        setState(() {
-          step = f.format(provider.getStep());
-          step_nocomma = provider.getStep().toString();
-        });
-      }
-    });
+    stepProvider.addListener(stepEventListener);
 
     scBoard.addListener(() {
       if (scBoard.offset >=
@@ -106,182 +96,6 @@ class WalkState extends State<Walk> {
     });
 
     super.initState();
-  }
-
-  Future<void> reloadData() async {
-
-    final parameters = {"jwt_token":jwtToken};
-    JsonApi.getApi("rest/today_step", parameters).then((value) {
-      ApiResponse apiResponse = ApiResponse();
-
-      apiResponse = value;
-      FocusScope.of(context).unfocus();
-
-      if((apiResponse.apiError).error == "9") {
-        // BannerData.items.clear();
-
-        final responseData = json.decode(apiResponse.data.toString());
-        debugPrint('data ${apiResponse.data}');
-
-        if(responseData['code'] == "101")
-        {
-          prefs.remove('jwt_token');
-
-          Navigator.of(context,rootNavigator: true).push(
-            MaterialPageRoute(builder: (context) =>
-            const LoginPage()),).then((value){
-
-          });
-
-          if(responseData['message'] != '')
-          {
-            Fluttertoast.showToast(
-                msg: responseData['message'],
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Colors.red,
-                textColor: Colors.white,
-                fontSize: 13.0
-            );
-          }
-
-        }
-        else
-        {
-          point1 = responseData['point1'];
-          point2 = responseData['point2'];
-
-          step_money = f.format(responseData['step_money']);
-          active_money = f.format(responseData['active_money']);
-
-          if(point1 == false && int.parse(step) > 4999)
-          {
-            point1 = true;
-          }
-
-          if(point2 == false && int.parse(step) > 9999)
-          {
-            point2 = true;
-          }
-
-          setState(() {
-
-          });
-        }
-
-
-      }
-      else
-      {
-        Fluttertoast.showToast(
-            msg: (apiResponse.apiError).msg,
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 13.0
-        );
-      }
-
-    });
-
-  }
-
-
-  Future<void> dataPoint(int page, bool init) async {
-
-    final parameters = {"jwt_token":jwtToken, "sca":selected};
-    JsonApi.getApi("rest/money", parameters).then((value) {
-      ApiResponse apiResponse = ApiResponse();
-
-      apiResponse = value;
-      FocusScope.of(context).unfocus();
-
-      if((apiResponse.apiError).error == "9") {
-        // BannerData.items.clear();
-
-        final responseData = json.decode(apiResponse.data.toString());
-        debugPrint('data ${apiResponse.data}');
-
-        isLoading = true;
-
-        setState(() {
-
-        });
-
-        if(responseData['total_count'].toString() == "0")
-        {
-
-        }
-        else
-        {
-          if(List.from(responseData['items']).toList().isNotEmpty) {
-
-            if(init == true)
-            {
-              PointListData.items = List.from(responseData['items'])
-                  .map<PointModel>((item) => PointModel.fromJson(item))
-                  .toList();
-            }
-            else
-            {
-              PointListData.items += List.from(responseData['items'])
-                  .map<PointModel>((item) => PointModel.fromJson(item))
-                  .toList();
-            }
-
-            setState(() {
-
-            });
-
-          }
-          else
-          {
-            if(responseData['code'].toString() == "101")
-            {
-              prefs.remove('jwt_token');
-
-              Navigator.of(context,rootNavigator: true).push(
-                MaterialPageRoute(builder: (context) =>
-                const LoginPage()),).then((value){
-
-              });
-
-              if(responseData['message'] != '')
-              {
-                Fluttertoast.showToast(
-                    msg: responseData['message'],
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.BOTTOM,
-                    timeInSecForIosWeb: 1,
-                    backgroundColor: Colors.red,
-                    textColor: Colors.white,
-                    fontSize: 13.0
-                );
-              }
-
-            }
-          }
-        }
-
-      }
-      else
-      {
-        Fluttertoast.showToast(
-            msg: (apiResponse.apiError).msg,
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 13.0
-        );
-      }
-
-    });
-
   }
 
   @override
@@ -727,7 +541,7 @@ class WalkState extends State<Walk> {
                   //상품포인트
                   GestureDetector(
                     onTap: () {
-
+                      launchUrl(Uri.parse('tel: 1522-0365'));
                     }, // Image tapped
                     child: Image.asset(
                       'assets/images/banner_point.png',
@@ -996,10 +810,213 @@ class WalkState extends State<Walk> {
 
   @override
   void dispose() {
-    // provider.dispose();
+    stepProvider.removeListener(stepEventListener);
     scBoard.dispose();
 
     super.dispose();
   }
 
+  Future<void> reloadData() async {
+
+    final parameters = {"jwt_token":jwtToken};
+    JsonApi.getApi("rest/today_step", parameters).then((value) {
+      ApiResponse apiResponse = ApiResponse();
+
+      apiResponse = value;
+      if(mounted)
+      {
+        FocusScope.of(context).unfocus();
+      }
+
+      if((apiResponse.apiError).error == "9") {
+        // BannerData.items.clear();
+
+        final responseData = json.decode(apiResponse.data.toString());
+        debugPrint('data ${apiResponse.data}');
+
+        if(responseData['code'] == "101")
+        {
+          prefs.remove('jwt_token');
+
+          Navigator.of(context,rootNavigator: true).push(
+            MaterialPageRoute(builder: (context) =>
+            const LoginPage()),).then((value){
+
+          });
+
+          if(responseData['message'] != '')
+          {
+            Fluttertoast.showToast(
+                msg: responseData['message'],
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 13.0
+            );
+          }
+
+        }
+        else
+        {
+          point1 = responseData['point1'];
+          point2 = responseData['point2'];
+
+          step_money = f.format(responseData['step_money']);
+          active_money = f.format(responseData['active_money']);
+          String result = step.replaceAll(RegExp('[^0-9\\s]'), "");
+
+          if(point1 == false && int.parse(result) > 4999)
+          {
+            point1 = true;
+          }
+
+          if(point2 == false && int.parse(result) > 9999)
+          {
+            point2 = true;
+          }
+
+          setState(() {
+
+          });
+        }
+
+
+      }
+      else
+      {
+        Fluttertoast.showToast(
+            msg: (apiResponse.apiError).msg,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 13.0
+        );
+      }
+
+    });
+
+  }
+
+
+  Future<void> dataPoint(int page, bool init) async {
+
+    final parameters = {"jwt_token":jwtToken, "sca":selected};
+    JsonApi.getApi("rest/money", parameters).then((value) {
+      ApiResponse apiResponse = ApiResponse();
+
+      apiResponse = value;
+
+      if(mounted)
+      {
+        FocusScope.of(context).unfocus();
+      }
+
+      if((apiResponse.apiError).error == "9") {
+        // BannerData.items.clear();
+
+        final responseData = json.decode(apiResponse.data.toString());
+
+        if(kDebug)
+        {
+          debugPrint('data ${apiResponse.data}');
+        }
+
+        setState(() {
+          isLoading = true;
+        });
+
+        if(responseData['total_count'].toString() == "0")
+        {
+
+        }
+        else
+        {
+          if(List.from(responseData['items']).toList().isNotEmpty) {
+
+            if(init == true)
+            {
+              PointListData.items = List.from(responseData['items'])
+                  .map<PointModel>((item) => PointModel.fromJson(item))
+                  .toList();
+            }
+            else
+            {
+              PointListData.items += List.from(responseData['items'])
+                  .map<PointModel>((item) => PointModel.fromJson(item))
+                  .toList();
+            }
+
+            setState(() {
+
+            });
+
+          }
+          else
+          {
+            if(responseData['code'].toString() == "101")
+            {
+              prefs.remove('jwt_token');
+
+              Navigator.of(context,rootNavigator: true).push(
+                MaterialPageRoute(builder: (context) =>
+                const LoginPage()),).then((value){
+
+              });
+
+              if(responseData['message'] != '')
+              {
+                Fluttertoast.showToast(
+                    msg: responseData['message'],
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 13.0
+                );
+              }
+
+            }
+          }
+        }
+
+      }
+      else
+      {
+        Fluttertoast.showToast(
+            msg: (apiResponse.apiError).msg,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 13.0
+        );
+      }
+
+    });
+
+  }
+
+  // provider 걸음수 함수
+  void stepEventListener() {
+    // Current class name print
+    // if (mounted) {
+    // if(kDebug)
+    // {
+    debugPrint('walk provider.step $step');
+    // }
+    var f = NumberFormat('###,###,###,###');
+    if (mounted) {
+      setState(() {
+        step = f.format(stepProvider.getStep());
+        step_nocomma = stepProvider.getStep().toString();
+      });
+    }
+
+  }
 }

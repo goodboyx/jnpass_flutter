@@ -15,8 +15,9 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 import 'package:jnpass/constants.dart';
-import 'package:jnpass/models/notiJwttokenEvent.dart';
+import 'package:jnpass/provider/notiJwttokenEvent.dart';
 import 'package:jnpass/pages/consultWrite.dart';
 import 'package:jnpass/pages/home.dart';
 import 'package:jnpass/pages/notice_page.dart';
@@ -71,7 +72,8 @@ int todaySteps = 0;
 // 백그라운드 으로 step_count를 통해서 전달함
 const EventChannel stepDetectionChannel = EventChannel('step_detection');
 const stepCountChannel = EventChannel('step_count');
-late StreamSubscription _timerSubscription;
+late StreamSubscription stepSubscription;
+late StreamSubscription stepDectSubscription;
 
 StreamController<String> _stateController = StreamController();
 Stream<String> get state => _stateController.stream;
@@ -81,6 +83,7 @@ Sink<String> get stateSink => _stateController.sink;
 late Stream<StepCount> _stepCountStream;
 late Stream<PedestrianStatus> _pedestrianStatusStream;
 
+final StepProvider stepProvider = StepProvider();
 
 const String portName = 'notification_send_port';
 
@@ -423,7 +426,6 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => StepProvider()),
         ChangeNotifierProvider(create: (_) => FormProvider()),
       ],
       child: const MyApp(),
@@ -468,7 +470,7 @@ Future<void> initializeService() async {
       isForegroundMode: true,
 
       notificationChannelId: notificationChannelId,
-      initialNotificationTitle: '하루에 10000 걸음 우리동네 SOS',
+      initialNotificationTitle: '하루에 10,000 걸음 우리동네 SOS',
       initialNotificationContent: '업데이트중...',
       foregroundServiceNotificationId: notificationId,
     ),
@@ -492,7 +494,7 @@ Future<void> initializeService() async {
     flutterLocalNotificationsPlugin.show(
       888,
       '업데이트 중...',
-      '하루에 10,000 걸음 우리동네 SOS v',
+      '하루에 10,000 걸음 우리동네 SOS',
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'my_foreground',
@@ -509,7 +511,9 @@ Future<void> initializeService() async {
 
 Future<void> step_count(value) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  int todayDayNo = DateTime.now().day;
+  final dateStr = DateFormat('yyyyMMdd').format(DateTime.now());
+  int todayDayNo = int.parse(dateStr);
+
   int savedStepCount = prefs.getInt('savedStepCount') ?? 0;
   int lastDaySaved = prefs.getInt('lastDaySaved') ?? 0;
   int todaySteps = prefs.getInt('todaySteps') ?? 0;
@@ -542,12 +546,13 @@ Future<void> step_count(value) async {
   }
 
   todaySteps = prefs.getInt('todaySteps') ?? 0;
+  debugPrint('step_count v $todaySteps');
 
-  debugPrint('step_count $todaySteps');
+  var f = NumberFormat('###,###,###,###');
 
   flutterLocalNotificationsPlugin.show(
     888,
-    '$todaySteps 걸음',
+    '${f.format(todaySteps)} 걸음',
     '하루에 10,000 걸음 우리동네 SOS',
     const NotificationDetails(
       android: AndroidNotificationDetails(
@@ -561,11 +566,16 @@ Future<void> step_count(value) async {
 
 }
 
+Future<void> step_detection(value) async {
+
+}
+
 void onStepCount(StepCount event) {
+  sleep(const Duration(milliseconds: 500));
+
   pref.reload();
   int todaySteps = pref.getInt("todaySteps") ?? 0;
-  GetIt.I.get<StepProvider>().setStep(todaySteps);
-
+  stepProvider.setStep(todaySteps);
   debugPrint('onStepCount $todaySteps');
 
 }
@@ -575,7 +585,20 @@ void onStepCountError(error) {
 }
 
 void onPedestrianStatusChanged(PedestrianStatus event) {
+  if(kDebug)
+  {
+    debugPrint('onPedestrianStatusChanged: ${event.status}');
+  }
 
+  if(event.status.toString() == "stopped")
+  {
+    pref.reload();
+    int todaySteps = pref.getInt("todaySteps") ?? 0;
+    if(kDebug) {
+      debugPrint('StatusChanged $todaySteps');
+    }
+    stepProvider.setStep(todaySteps);
+  }
 }
 
 void onPedestrianStatusError(error) {
@@ -638,7 +661,8 @@ Future<void> onStart(ServiceInstance service) async {
   });
 
   debugPrint('onStart');
-  _timerSubscription = stepCountChannel.receiveBroadcastStream().listen(step_count);
+  stepSubscription = stepCountChannel.receiveBroadcastStream().listen(step_count);
+  stepDectSubscription = stepDetectionChannel.receiveBroadcastStream().listen(step_detection);
   /*
   Timer.periodic(const Duration(seconds: 1), (timer) async {
     if (service is AndroidServiceInstance) {
@@ -812,7 +836,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    GetIt.I.isRegistered<StepProvider>() ? null : GetIt.I.registerSingleton<StepProvider>(StepProvider(), signalsReady: true);
     GetIt.I.isRegistered<FormProvider>() ? null : GetIt.I.registerSingleton<FormProvider>(FormProvider(), signalsReady: true);
     // GetIt.I.isRegistered<LocationProvider>() ? null : GetIt.I.registerSingleton<LocationProvider>(LocationProvider(), signalsReady: true);
     notiJwttokenEvent.addListener(notiEventListener);
