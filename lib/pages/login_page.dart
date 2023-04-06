@@ -11,7 +11,7 @@ import 'package:uuid/uuid.dart';
 import '../api/jsonapi.dart';
 import '../models/apiResponse.dart';
 import '../models/bannermodel.dart';
-import '../models/notiJwttokenEvent.dart';
+import '../provider/notiJwttokenEvent.dart';
 import 'noticeview.dart';
 import 'resgister_page.dart';
 
