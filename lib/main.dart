@@ -840,6 +840,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // GetIt.I.isRegistered<LocationProvider>() ? null : GetIt.I.registerSingleton<LocationProvider>(LocationProvider(), signalsReady: true);
     notiJwttokenEvent.addListener(notiEventListener);
 
+
     // _handleIncomingLinks();
     _handleInitialUri();
 
@@ -909,6 +910,16 @@ class _MyHomePageState extends State<MyHomePage> {
     SharedPreferences.getInstance().then((value) async {
       pref = value;
       jwtToken = pref.getString('jwt_token') ?? "";
+
+      int lastDaySaved = pref.getInt('lastDaySaved') ?? 0;
+      final dateStr = DateFormat('yyyyMMdd').format(DateTime.now());
+      int todayDayNo = int.parse(dateStr);
+
+      if (todayDayNo > lastDaySaved) {
+        pref.setInt('lastDaySaved', todayDayNo);
+        pref.setInt('todaySteps', 0);
+        todaySteps = 0;
+      }
 
       initPlatformState();
 
