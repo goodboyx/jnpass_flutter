@@ -40,6 +40,8 @@ class WalkState extends State<Walk> {
   bool isLoading = false;
   bool point1 = false;
   bool point2 = false;
+  bool point1Complete = false;
+  bool point2Complete = false;
   String step_money = "0";
   String active_money = "0";
   int pageCount = 1;
@@ -232,7 +234,7 @@ class WalkState extends State<Walk> {
                                 Align(alignment: Alignment.topRight,
                                     child: TextButton(
                                       onPressed: () {
-                                        if(point1)
+                                        if(point1 && point1Complete == false)
                                         {
                                           final parameters = {"jwt_token":jwtToken, "money":"30"};
                                           JsonApi.postApi("rest/step_money", parameters).then((value) {
@@ -271,14 +273,28 @@ class WalkState extends State<Walk> {
                                               }
                                               else
                                               {
-                                                if(responseData['return'])
+                                                if(responseData['return'].toString() == "true")
                                                 {
-                                                  reloadData();
+                                                  point1 = false;
+                                                  point1Complete = true;
 
-                                                  setState(() {
-                                                    point1 = false;
-                                                  });
+                                                  reloadData();
+                                                  dataPoint(1, true);
                                                 }
+
+                                                if(responseData['message'] != '')
+                                                {
+                                                  Fluttertoast.showToast(
+                                                      msg: responseData['message'],
+                                                      toastLength: Toast.LENGTH_SHORT,
+                                                      gravity: ToastGravity.BOTTOM,
+                                                      timeInSecForIosWeb: 1,
+                                                      backgroundColor: Colors.red,
+                                                      textColor: Colors.white,
+                                                      fontSize: 13.0
+                                                  );
+                                                }
+
                                               }
 
 
@@ -303,9 +319,9 @@ class WalkState extends State<Walk> {
                                           foregroundColor: Colors.red,
                                           elevation: 2,
                                           backgroundColor: point1 ? const Color(0XFF98BF54) : const Color(0XFFC1C6C9)),
-                                      child: const Text(
-                                        '30P 적립',
-                                        style: TextStyle(color: Colors.white, fontSize: 14),
+                                      child: Text(
+                                        point1Complete ? '30P 완료' : '30P 적립',
+                                        style: const TextStyle(color: Colors.white, fontSize: 14),
                                       ),
                                     ),
 
@@ -327,7 +343,7 @@ class WalkState extends State<Walk> {
                                   Align(alignment: Alignment.topRight,
                                     child: TextButton(
                                       onPressed: () {
-                                        if(point2)
+                                        if(point2 && point2Complete == false)
                                         {
                                           final parameters = {"jwt_token":jwtToken, "money":"70"};
                                           JsonApi.postApi("rest/step_money", parameters).then((value) {
@@ -369,14 +385,27 @@ class WalkState extends State<Walk> {
                                                 if(responseData['return'])
                                                 {
                                                   reloadData();
+                                                  dataPoint(1, true);
 
                                                   setState(() {
                                                     point2 = false;
+                                                    point2Complete = true;
                                                   });
                                                 }
+
+                                                if(responseData['message'] != '')
+                                                {
+                                                  Fluttertoast.showToast(
+                                                      msg: responseData['message'],
+                                                      toastLength: Toast.LENGTH_SHORT,
+                                                      gravity: ToastGravity.BOTTOM,
+                                                      timeInSecForIosWeb: 1,
+                                                      backgroundColor: Colors.red,
+                                                      textColor: Colors.white,
+                                                      fontSize: 13.0
+                                                  );
+                                                }
                                               }
-
-
                                             }
                                             else
                                             {
@@ -400,8 +429,8 @@ class WalkState extends State<Walk> {
                                           foregroundColor: Colors.red,
                                           elevation: 2,
                                           backgroundColor: point2 ? const Color(0XFF98BF54) : const Color(0XFFC1C6C9)),
-                                      child: const Text(
-                                        '70P 적립',
+                                      child: Text(
+                                        point2Complete ? '70P 완료' : '70P 적립',
                                         style: TextStyle(color: Colors.white, fontSize: 14),
                                       ),
                                     ),
@@ -724,7 +753,7 @@ class WalkState extends State<Walk> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 15,),
+                      const SizedBox(height: 15,),
                       RichText(
                         text: const TextSpan(
                           children: [
@@ -863,8 +892,11 @@ class WalkState extends State<Walk> {
           point1 = responseData['point1'];
           point2 = responseData['point2'];
 
-          step_money = f.format(responseData['step_money']);
-          active_money = f.format(responseData['active_money']);
+          point1Complete = responseData['point1Complete'];
+          point2Complete = responseData['point2Complete'];
+
+          step_money    = f.format(responseData['step_money']);
+          active_money  = f.format(responseData['active_money']);
           String result = step.replaceAll(RegExp('[^0-9\\s]'), "");
 
           if(point1 == false && int.parse(result) > 4999)
