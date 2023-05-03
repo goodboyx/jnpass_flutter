@@ -105,7 +105,7 @@ class WalkState extends State<Walk> {
     Size size = MediaQuery.of(context).size;
 
     var screenWidth  = size.width;
-    var screenHeight = size.height;
+    // var screenHeight = size.height;
     // var _crossAxisCount = ((_screenWidth - 32) / 160).floor(); //컬럼 갯수
     var crossAxisCount = 1; //컬럼 갯수
     var crossAxisSpacing = 8;
@@ -217,7 +217,7 @@ class WalkState extends State<Walk> {
                         borderRadius: BorderRadius.circular(40),
                       ),
                       child: Column(
-                        // TODO: Center items on the card (123)
+                          // TODO: Center items on the card (123)
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Row(
@@ -431,7 +431,7 @@ class WalkState extends State<Walk> {
                                           backgroundColor: point2 ? const Color(0XFF98BF54) : const Color(0XFFC1C6C9)),
                                       child: Text(
                                         point2Complete ? '70P 완료' : '70P 적립',
-                                        style: TextStyle(color: Colors.white, fontSize: 14),
+                                        style: const TextStyle(color: Colors.white, fontSize: 14),
                                       ),
                                     ),
 
@@ -758,17 +758,12 @@ class WalkState extends State<Walk> {
                         text: const TextSpan(
                           children: [
                             TextSpan(
-                              text: "- 탄소중립걸음수에 따른 포인트",
-                              style: TextStyle(
-                                color: Color(0xFF212529),
-                              ),
-                            ),
-                            TextSpan(
-                              text: "(하루1회)",
+                              text: "*걸음포인트 (하루1회)",
                               style: TextStyle(
                                 height: 1.5,
                                 color: Color(0xFF98BF54),
                                 fontWeight: FontWeight.bold,
+                                fontSize: 18.0,
                               ),
                             ),
                           ],
@@ -778,10 +773,11 @@ class WalkState extends State<Walk> {
                         text: const TextSpan(
                           children: [
                             TextSpan(
-                              text: "5,000걸음 30포인트, 10,000보 70포인트 총 100포인트",
+                              text: "5,000걸음 30포인트, 10,000보 70포인트",
                               style: TextStyle(
                                 height: 1.5,
                                 color: Color(0xFF212529),
+                                fontSize: 16.0,
                               ),
                             ),
                           ],
@@ -791,10 +787,68 @@ class WalkState extends State<Walk> {
                         text: const TextSpan(
                           children: [
                             TextSpan(
-                              text: "- 긴급돌봄 상담접수 1건 (하루 1회): 10포인트",
+                              text: "총 100포인트",
                               style: TextStyle(
                                 height: 1.5,
                                 color: Color(0xFF212529),
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "*활동포인트",
+                              style: TextStyle(
+                                height: 1.5,
+                                color: Color(0xFF98BF54),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "- 긴급돌봄 상담접수 1건 10포인트 (1일 1회)",
+                              style: TextStyle(
+                                height: 1.5,
+                                color: Color(0xFF212529),
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "- 동네소식 글 작성자 1건 10포인트(1일 1회) ",
+                              style: TextStyle(
+                                height: 1.5,
+                                color: Color(0xFF212529),
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "- 댓글 1건 2포인트(1일 5회)",
+                              style: TextStyle(
+                                height: 1.5,
+                                color: Color(0xFF212529),
+                                fontSize: 16.0,
                               ),
                             ),
                           ],
@@ -808,6 +862,7 @@ class WalkState extends State<Walk> {
                               style: TextStyle(
                                 height: 1.5,
                                 color: Color(0xFF212529),
+                                fontSize: 16.0,
                               ),
                             ),
                           ],
@@ -817,16 +872,18 @@ class WalkState extends State<Walk> {
                         text: const TextSpan(
                           children: [
                             TextSpan(
-                              text: "- 동네소식 글 작성자 1건당 10포인트(하루 1회), 댓글 1건당 2포인트(하루 5회)",
+                              text: "* 적립한 포인트는 1만원 단위로 지역상품권으로 교환해드립니다.(예산소진 시까지)",
                               style: TextStyle(
                                 height: 1.5,
-                                color: Color(0xFF212529),
+                                color: Color(0xFF98BF54),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18.0,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 10,),
+                      const SizedBox(height: 10,),
                     ],
                   ),
               ]
