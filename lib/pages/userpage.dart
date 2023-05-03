@@ -280,11 +280,11 @@ class UserPageState extends State<UserPage> {
             msgType = '6';
           }
         }
-
-        if(validateEmail(emailController.text) == "N")
-        {
-          msgType = '7';
-        }
+        // 이메일 양식 체크
+        // if(validateEmail(emailController.text) == "N")
+        // {
+        //   msgType = '7';
+        // }
 
         // debugPrint('msgType : $msgType');
 
