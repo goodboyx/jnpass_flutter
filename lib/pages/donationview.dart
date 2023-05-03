@@ -3,21 +3,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jnpass/api/jsonapi.dart';
-import 'package:jnpass/pages/singo.dart';
-import 'package:jnpass/pages/userprofile.dart';
-import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
+// import 'package:mqtt_client/mqtt_client.dart';
+// import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:multi_image_picker2/multi_image_picker2.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../chat_provider.dart';
@@ -28,9 +23,7 @@ import '../models/bannermodel.dart';
 import '../models/boardmodel.dart';
 import '../models/commentmodel.dart';
 import '../models/member.dart';
-// ignore: depend_on_referenced_packages
 import 'package:html/dom.dart' as dom;
-// ignore: depend_on_referenced_packages
 import 'package:html/parser.dart' as htmlparser;
 
 import '../util.dart';
@@ -71,7 +64,7 @@ class DonationViewState extends State<DonationView> {
   static final GlobalKey<ScaffoldState> globalKey = GlobalKey();
   final ScrollController _scrollController = ScrollController();
   final ScrollController scBoard = ScrollController();
-  late MqttServerClient client;
+  // late MqttServerClient client;
 
   List<Asset> imageList = <Asset>[];
   String error = 'No Error Dectected';
@@ -194,7 +187,7 @@ class DonationViewState extends State<DonationView> {
   }
 
   void reloadData() {
-    connect();
+    // connect();
 
     DonationCommentData.items.clear();
 
@@ -258,9 +251,8 @@ class DonationViewState extends State<DonationView> {
 
     Size size = MediaQuery.of(context).size;
 
-    var screenWidth  = size.width;
-    var screenHeight = size.height;
-
+    // var screenWidth  = size.width;
+    // var screenHeight = size.height;
     // debugPrint("url : $url");
 
     return GestureDetector(
@@ -728,11 +720,11 @@ class DonationViewState extends State<DonationView> {
           if (responseData['msg'] == "ok") {
             apiResponse.apiError = ApiError("9", "");
 
-            const pubTopic = 'notice';
-            final builder = MqttClientPayloadBuilder();
-            builder.addString('new@@comment@@${widget.boTable}@@${responseData['wr_id']}@@${widget.wrId}');
-
-            client.publishMessage(pubTopic, MqttQos.atLeastOnce, builder.payload!);
+            // const pubTopic = 'notice';
+            // final builder = MqttClientPayloadBuilder();
+            // builder.addString('new@@comment@@${widget.boTable}@@${responseData['wr_id']}@@${widget.wrId}');
+            //
+            // client.publishMessage(pubTopic, MqttQos.atLeastOnce, builder.payload!);
           }
           break;
         case 401:
@@ -765,131 +757,6 @@ class DonationViewState extends State<DonationView> {
     }
 
   }
-
-
-  // 댓글 삭하시겠습니까?
-  Future<void> _showDialogDel(String wrId) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('경고'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: const <Widget>[
-                Text('글을 삭제하시겠습니까?'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('확인'),
-              onPressed: () {
-
-                // 푸쉬 회원아이디 업데이트제
-                postRequest() async {
-                  String url = '${appApiUrl}app_comment_delete.php';
-
-                  http.post(
-                    Uri.parse(url),
-                    headers: <String, String> {
-                      'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: <String, String> {
-                      'at_token': prefs.getString('at_token').toString(),
-                      'mb_id': mbId,
-                      'bo_table': widget.boTable,
-                      'wr_parent': widget.wrId,
-                      'wr_id': wrId,
-                    },
-                  );
-
-                  // var responseBody = response.body;
-                  // final responseData = json.decode(responseBody);
-
-                  const pubTopic = 'notice';
-                  final builder = MqttClientPayloadBuilder();
-                  builder.addString('del@@comment@@${widget.boTable}@@$wrId');
-                  client.publishMessage(pubTopic, MqttQos.atLeastOnce, builder.payload!);
-
-                  Navigator.pop(context);
-
-                  // dataComment(currentPage, true);
-                  // debugPrint("responseBody : " + responseData['result']);
-                }
-
-                postRequest();
-
-              },
-            ),
-            TextButton(
-              child: const Text('아니오'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _commentLike(String wrId) async {
-    ApiResponse apiResponse = ApiResponse();
-
-    try {
-      Uri url = Uri.parse(
-          '${appApiUrl}app_good.php?r=${Random.secure()
-              .nextInt(10000)
-              .toString()}');
-
-      final response = await http.post(url,
-        headers: <String, String> {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: <String, String> {
-          'at_token': prefs.getString('at_token').toString(),
-          'mb_id': mbId,
-          'bo_table': widget.boTable,
-          'wr_id': wrId,
-        },
-      );
-
-      switch (response.statusCode) {
-        case 200:
-          apiResponse.apiError = ApiError("9", "");
-          break;
-        case 401:
-          apiResponse.apiError = ApiError("4", "401");
-          break;
-        default:
-          apiResponse.apiError = ApiError("1", "http 상태 에러");
-          break;
-      }
-    } on SocketException {
-      apiResponse.apiError = ApiError("8", "app_get_member.php socket error");
-    }
-
-    if((apiResponse.apiError).error == "9")
-    {
-
-    }
-    else
-    {
-      Fluttertoast.showToast(
-          msg: (apiResponse.apiError).msg ,
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 13.0
-      );
-    }
-
-  }
-
 
   Future<ApiResponse> dataComment(int page, bool init) async {
     ApiResponse apiResponse = ApiResponse();
@@ -952,60 +819,60 @@ class DonationViewState extends State<DonationView> {
   }
 
 
-  Future<MqttServerClient> connect() async {
-    client =
-        MqttServerClient.withPort('driver.cloudmqtt.com', 'app_${Random.secure().nextInt(10000) * 100}' , 18749);
-
-    client.logging(on: true);
-    client.onConnected = onConnected;
-    client.onDisconnected = onDisconnected;
-
-    try {
-      await client.connect('ccsfssyj', '-UJ0-kP8Wr8h');
-    } catch (e) {
-      debugPrint('mqtt Exception: $e');
-      client.disconnect();
-    }
-    // print('app_' + (random.nextInt(90) * 10).toString());
-
-    const pubTopic = 'notice';
-    client.subscribe(pubTopic, MqttQos.exactlyOnce);
-
-    client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
-      final recMess = c![0].payload as MqttPublishMessage;
-      final pt =
-      MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-
-      /// The above may seem a little convoluted for users only interested in the
-      /// payload, some users however may be interested in the received publish message,
-      /// lets not constrain ourselves yet until the package has been in the wild
-      /// for a while.
-      /// The payload is a byte buffer, this will be specific to the topic
-      debugPrint(
-          'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
-
-      final split = pt.split("@@");
-
-      if(split[0] == "del")
-      {
-        if(split[2] == widget.boTable &&  split[3] == widget.wrId)
-        {
-          dataComment(currentPage, true);
-        }
-      }
-      else
-      {
-        if(split[2] == widget.boTable &&  split[4] == widget.wrId)
-        {
-          dataComment(currentPage, true);
-        }
-      }
-
-    });
-
-    return client;
-
-  }
+  // Future<MqttServerClient> connect() async {
+  //   client =
+  //       MqttServerClient.withPort('driver.cloudmqtt.com', 'app_${Random.secure().nextInt(10000) * 100}' , 18749);
+  //
+  //   client.logging(on: true);
+  //   client.onConnected = onConnected;
+  //   client.onDisconnected = onDisconnected;
+  //
+  //   try {
+  //     await client.connect('ccsfssyj', '-UJ0-kP8Wr8h');
+  //   } catch (e) {
+  //     debugPrint('mqtt Exception: $e');
+  //     client.disconnect();
+  //   }
+  //   // print('app_' + (random.nextInt(90) * 10).toString());
+  //
+  //   const pubTopic = 'notice';
+  //   client.subscribe(pubTopic, MqttQos.exactlyOnce);
+  //
+  //   client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
+  //     final recMess = c![0].payload as MqttPublishMessage;
+  //     final pt =
+  //     MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+  //
+  //     /// The above may seem a little convoluted for users only interested in the
+  //     /// payload, some users however may be interested in the received publish message,
+  //     /// lets not constrain ourselves yet until the package has been in the wild
+  //     /// for a while.
+  //     /// The payload is a byte buffer, this will be specific to the topic
+  //     debugPrint(
+  //         'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
+  //
+  //     final split = pt.split("@@");
+  //
+  //     if(split[0] == "del")
+  //     {
+  //       if(split[2] == widget.boTable &&  split[3] == widget.wrId)
+  //       {
+  //         dataComment(currentPage, true);
+  //       }
+  //     }
+  //     else
+  //     {
+  //       if(split[2] == widget.boTable &&  split[4] == widget.wrId)
+  //       {
+  //         dataComment(currentPage, true);
+  //       }
+  //     }
+  //
+  //   });
+  //
+  //   return client;
+  //
+  // }
 
   void onConnected() {
     // print('Connected');
@@ -1019,7 +886,7 @@ class DonationViewState extends State<DonationView> {
 
   @override
   void dispose() {
-    client.disconnect();
+    // client.disconnect();
     scBoard.dispose();
     _scrollController.dispose();
     super.dispose();

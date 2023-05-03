@@ -2,8 +2,6 @@ import 'dart:math';
 
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:location/location.dart';
-import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
 
 import 'dart:convert';
 import 'dart:io';
@@ -446,7 +444,7 @@ class SosFormState extends State<SosForm> {
 
       if(responseData['msg'] == "ok")
       {
-        connect(responseData['wr_id'].toString());
+        // connect(responseData['wr_id'].toString());
 
         // ignore: use_build_context_synchronously
         Navigator.pop(_context, responseData);
@@ -581,34 +579,34 @@ class SosFormState extends State<SosForm> {
     );
   }
 
-  Future<MqttServerClient> connect(String wrId) async {
-    Random random = Random();
-
-    // print('app_' + (random.nextInt(90) * 10).toString());
-
-    MqttServerClient client =
-    MqttServerClient.withPort('driver.cloudmqtt.com', 'app_${random.nextInt(10000) * 100}' , 18749);
-
-    client.logging(on: true);
-    client.onConnected = onConnected;
-    client.onDisconnected = onDisconnected;
-
-    try {
-      await client.connect('ccsfssyj', '-UJ0-kP8Wr8h');
-    } catch (e) {
-      // print('mqtt Exception: $e');
-      client.disconnect();
-    }
-
-    const pubTopic = 'notice';
-    final builder = MqttClientPayloadBuilder();
-    builder.addString('new@@write@@$wrId');
-
-    client.publishMessage(pubTopic, MqttQos.atLeastOnce, builder.payload!);
-
-    client.disconnect();
-    return client;
-  }
+  // Future<MqttServerClient> connect(String wrId) async {
+  //   Random random = Random();
+  //
+  //   // print('app_' + (random.nextInt(90) * 10).toString());
+  //
+  //   MqttServerClient client =
+  //   MqttServerClient.withPort('driver.cloudmqtt.com', 'app_${random.nextInt(10000) * 100}' , 18749);
+  //
+  //   client.logging(on: true);
+  //   client.onConnected = onConnected;
+  //   client.onDisconnected = onDisconnected;
+  //
+  //   try {
+  //     await client.connect('ccsfssyj', '-UJ0-kP8Wr8h');
+  //   } catch (e) {
+  //     // print('mqtt Exception: $e');
+  //     client.disconnect();
+  //   }
+  //
+  //   const pubTopic = 'notice';
+  //   final builder = MqttClientPayloadBuilder();
+  //   builder.addString('new@@write@@$wrId');
+  //
+  //   client.publishMessage(pubTopic, MqttQos.atLeastOnce, builder.payload!);
+  //
+  //   client.disconnect();
+  //   return client;
+  // }
 
   void onConnected() {
     // print('Connected');

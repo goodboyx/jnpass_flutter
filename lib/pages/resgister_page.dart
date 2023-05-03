@@ -8,7 +8,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hex/hex.dart';
 import 'package:jnpass/constants.dart';
-import 'package:jnpass/hpauth.dart';
 import 'package:jnpass/pages/agree_page.dart';
 import 'package:pointycastle/digests/md5.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -478,6 +477,7 @@ class RegisterPageState extends State<RegisterPage> {
                                   margin: const EdgeInsets.only(left: 0.0, bottom: 0.0, top: 0.0, right: 25.0),
                                   child: TextButton(
                                     onPressed: () {
+                                      /*
                                       Navigator.of(context,rootNavigator: true).push(
                                           MaterialPageRoute(builder: (context) => const HpAuth())
                                       ).then((value){
@@ -513,6 +513,7 @@ class RegisterPageState extends State<RegisterPage> {
                                           }
                                         }
                                       });
+                                      */
                                     },
                                     style: TextButton.styleFrom(
                                       padding: const EdgeInsets.only(left: 15.0, bottom: 0.0, top: 0.0, right: 15.0),

@@ -4,10 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../api/jsonapi.dart';
 import '../constants.dart';
-import 'package:http/http.dart' as http;
 import '../models/apiResponse.dart';
-import '../models/member.dart';
-import '../util.dart';
 import 'login_page.dart';
 
 
@@ -27,7 +24,7 @@ class UserPageState extends State<UserPage> {
   late String meLoc;
   late String msgType;
   final TextEditingController pwController    = TextEditingController();
-  final TextEditingController rePwController    = TextEditingController();
+  final TextEditingController rePwController  = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   bool passwordVisible = true;
   bool passwordVisible2 = true;
@@ -149,7 +146,7 @@ class UserPageState extends State<UserPage> {
 
                         _entryField("비밀번호", pwController, isPassword: passwordVisible),
                         _entryField("비밀번호 확인", rePwController, isPassword: passwordVisible2),
-                        _entryField("이메일 주소", emailController, isPassword: false, isEmail: true),
+                        // _entryField("이메일 주소", emailController, isPassword: false, isEmail: true),
                         const SizedBox(height: 10),
                         _submitButton(),
                       ]
@@ -293,7 +290,8 @@ class UserPageState extends State<UserPage> {
 
         if(msgType == "")
         {
-          final parameters = {"jwt_token": jwtToken, "mb_password" : pwController.text, "mb_email" : emailController.text};
+          // final parameters = {"jwt_token": jwtToken, "mb_password" : pwController.text, "mb_email" : emailController.text};
+          final parameters = {"jwt_token": jwtToken, "mb_password" : pwController.text};
           JsonApi.postApi("rest/member_password", parameters).then((value) {
             ApiResponse apiResponse = ApiResponse();
 
@@ -301,9 +299,8 @@ class UserPageState extends State<UserPage> {
 
             if((apiResponse.apiError).error == "9") {
 
-              final responseData = json.decode(apiResponse.data.toString());
-              debugPrint('data ${apiResponse.data}');
-
+              // final responseData = json.decode(apiResponse.data.toString());
+              // debugPrint('data ${apiResponse.data}');
               // if(responseData['code'].toString() == "0")
               // {
               //

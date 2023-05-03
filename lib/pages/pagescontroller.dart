@@ -1,32 +1,20 @@
-// ignore_for_file: non_constant_identifier_names, prefer_typing_uninitialized_variables
-
-import 'dart:io';
-import 'dart:math';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:jnpass/pages/sosform.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:get_it/get_it.dart';
-import 'package:jnpass/pages/donationview.dart';
 import 'package:jnpass/pages/home.dart';
 import 'package:jnpass/pages/news.dart';
-import 'package:jnpass/pages/newsview.dart';
 import 'package:jnpass/pages/profile_page.dart';
-import 'package:jnpass/pages/share.dart';
 import 'package:jnpass/pages/shareview.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import '../constants.dart';
-import '../secondWebview.dart';
-import 'donation.dart';
 import 'notice_page.dart';
 import 'noticeview.dart';
 
@@ -138,19 +126,19 @@ class _PagesControllerState extends State<PagesController> {
         );
       }
       else {
-        Navigator.push(
-          _PagesControllerState.globalKey.currentContext!,
-          MaterialPageRoute(builder: (context) =>
-              SecondWebview(url: message['link'],
-                agent: '',
-                title: message['title'],
-                bo_table: message['bo_table'],
-                wr_id: message['wr_id'],
-                like: '0',
-                share: '0',
-                singo: '0',
-                modify: '0',)),
-        );
+        // Navigator.push(
+        //   _PagesControllerState.globalKey.currentContext!,
+        //   MaterialPageRoute(builder: (context) =>
+        //       SecondWebview(url: message['link'],
+        //         agent: '',
+        //         title: message['title'],
+        //         bo_table: message['bo_table'],
+        //         wr_id: message['wr_id'],
+        //         like: '0',
+        //         share: '0',
+        //         singo: '0',
+        //         modify: '0',)),
+        // );
       }
 
       // prefs.setString('push', '${message['title']}@@${message['bo_table']}@@${message['wr_id']}@@${message['link']}');
