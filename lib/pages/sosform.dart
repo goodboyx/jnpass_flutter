@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:location/location.dart';
 
@@ -18,7 +16,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants.dart';
 import '../widgets/google_map.dart';
 
-// ignore: must_be_immutable
 class SosForm extends StatefulWidget {
   String wrId;
 
@@ -544,9 +541,9 @@ class SosFormState extends State<SosForm> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('경고'),
-          content: SingleChildScrollView(
+          content: const SingleChildScrollView(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('이미지를 삭제하시겠습니까?'),
                 // Text('Would you like to approve of this message?'),
               ],

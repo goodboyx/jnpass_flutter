@@ -16,8 +16,6 @@ import 'package:jnpass/pages/shareview.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'notice_page.dart';
-import 'noticeview.dart';
-
 
 GetIt getIt = GetIt.instance;
 late AndroidNotificationChannel channel;
@@ -103,47 +101,6 @@ class _PagesControllerState extends State<PagesController> {
     });
 
     bottomTapped(0);
-  }
-
-  void _handleNotification(Map<String, dynamic> message) {
-
-    // ignore: unnecessary_null_comparison
-    if(message != null) {
-      if (message['bo_table'] == "notice") {
-
-        // Navigator.of(context).popUntil((route) => route.isFirst).then
-        Navigator.push(
-          _PagesControllerState.globalKey.currentContext!,
-          MaterialPageRoute(builder: (context) =>
-              NoticeView(wrId: message['wr_id'])),
-        );
-      }
-      else if (message['bo_table'] == "share") {
-        Navigator.push(
-          _PagesControllerState.globalKey.currentContext!,
-          MaterialPageRoute(builder: (context) =>
-              ShareView(wrId: message['wr_id']),),
-        );
-      }
-      else {
-        // Navigator.push(
-        //   _PagesControllerState.globalKey.currentContext!,
-        //   MaterialPageRoute(builder: (context) =>
-        //       SecondWebview(url: message['link'],
-        //         agent: '',
-        //         title: message['title'],
-        //         bo_table: message['bo_table'],
-        //         wr_id: message['wr_id'],
-        //         like: '0',
-        //         share: '0',
-        //         singo: '0',
-        //         modify: '0',)),
-        // );
-      }
-
-      // prefs.setString('push', '${message['title']}@@${message['bo_table']}@@${message['wr_id']}@@${message['link']}');
-    }
-
   }
 
   void pageChanged(int index) {

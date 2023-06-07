@@ -162,7 +162,7 @@ class UserPageState extends State<UserPage> {
   // 이메일 양식 맞는지 체크
   String validateEmail(String? value) {
 
-    bool emailValid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value.toString());
+    bool emailValid = RegExp(r"""^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+""").hasMatch(value.toString());
 
     // debugPrint(' emailValid : $emailValid');
     if (emailValid) {
@@ -299,15 +299,21 @@ class UserPageState extends State<UserPage> {
 
             if((apiResponse.apiError).error == "9") {
 
-              // final responseData = json.decode(apiResponse.data.toString());
-              // debugPrint('data ${apiResponse.data}');
-              // if(responseData['code'].toString() == "0")
-              // {
-              //
-              //   setState(() {
-              //
-              //   });
-              // }
+              final responseData = json.decode(apiResponse.data.toString());
+              debugPrint('data ${apiResponse.data}');
+              if(responseData['code'].toString() == "0")
+              {
+                Fluttertoast.showToast(
+                    msg: responseData['message'].toString(),
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 13.0
+                );
+
+              }
             }
             else
             {

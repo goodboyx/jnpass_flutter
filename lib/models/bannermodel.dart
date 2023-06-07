@@ -14,6 +14,10 @@ class DonationBannerData {
   static List<BannerModel> items = [];
 }
 
+class NoticeBannerData {
+  static List<BannerModel> items = [];
+}
+
 class ResultBannerData {
   static List<BannerModel> items = [];
 }

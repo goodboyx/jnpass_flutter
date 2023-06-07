@@ -33,7 +33,7 @@ class NewsPageState extends State<NewsPage> {
   bool isLoading = false;
   int page = 1;
   int totalPage = 1;
-  int limit = 10;
+  int limit = 15;
   List<BoardCategory> cateData = [];
   late String ca_name = "1";
   final ScrollController scBoard = ScrollController();
@@ -62,7 +62,7 @@ class NewsPageState extends State<NewsPage> {
     });
 
     notiEvent.addListener(notiEventListener);
-
+    NewsBoardData.items.clear();
     dataBoard(1, true);
 
     scBoard.addListener(() {
@@ -73,19 +73,11 @@ class NewsPageState extends State<NewsPage> {
         debugPrint('$totalPage : $page ');
 
         setState(() {
-          if(totalPage > page) {
-            // isLoading = true;
-          }
-          else
-          {
-            // isLoading = false;
-          }
-
           if (isLoading) {
             // 화면 끝에 닿았을 때 이루어질 동작
             page = page + 1;
 
-            if(totalPage < limit) {
+            if(totalPage < totalPage) {
               page = totalPage;
             }
             else
@@ -161,7 +153,6 @@ class NewsPageState extends State<NewsPage> {
   }
 
   Future<void> dataBoard(int page, bool init) async {
-    NewsBoardData.items.clear();
     setState(() {
       isLoading = false;
     });
@@ -180,31 +171,6 @@ class NewsPageState extends State<NewsPage> {
         {
           debugPrint('data ${apiResponse.data}');
         }
-
-        // if(responseData['code'].toString() == "101")
-        // {
-        //   prefs.remove('jwt_token');
-        //
-        //   Navigator.of(context,rootNavigator: true).push(
-        //     MaterialPageRoute(builder: (context) =>
-        //     const LoginPage()),).then((value){
-        //
-        //   });
-        //
-        //   if(responseData['message'] != '')
-        //   {
-        //     Fluttertoast.showToast(
-        //         msg: responseData['message'],
-        //         toastLength: Toast.LENGTH_SHORT,
-        //         gravity: ToastGravity.BOTTOM,
-        //         timeInSecForIosWeb: 1,
-        //         backgroundColor: Colors.red,
-        //         textColor: Colors.white,
-        //         fontSize: 13.0
-        //     );
-        //   }
-        //
-        // }
 
         if(responseData['code'].toString() == "0")
         {

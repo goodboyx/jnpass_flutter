@@ -158,11 +158,9 @@ class NewsViewState extends State<NewsView> {
     // var _crossAxisCount = ((_screenWidth - 32) / 160).floor(); //컬럼 갯수
     var crossAxisCount = 1; //컬럼 갯수
     var crossAxisSpacing = 8;
-    var width = (screenWidth - ((crossAxisCount - 1) * crossAxisSpacing)) /
-        crossAxisCount;
+    var width = (screenWidth - ((crossAxisCount - 1) * crossAxisSpacing)) / crossAxisCount;
     var cellHeight = 160;
-    var aspectRatio = width / cellHeight;
-
+    // var aspectRatio = width / cellHeight;
     var mainHeight = screenHeight - 200;
 
     if(Platform.isIOS){
@@ -467,9 +465,9 @@ class NewsViewState extends State<NewsView> {
                                     (DonationBannerData.items.isNotEmpty)
                                         ?
                                     CarouselSlider(
-                                      options: CarouselOptions(height: 200),
+                                      options: CarouselOptions(height: 300),
                                       items: DonationBannerData.items.toList().map((item) =>
-                                          Image.network(item.img_src, fit:BoxFit.fitWidth, width: 1000))
+                                          Image.network(item.img_src, fit:BoxFit.fitHeight, width: 800))
                                           .toList(),
                                     )
                                         :

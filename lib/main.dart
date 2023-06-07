@@ -828,8 +828,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
       }
     }
-
-
   }
 
   @override
@@ -839,7 +837,6 @@ class _MyHomePageState extends State<MyHomePage> {
     GetIt.I.isRegistered<FormProvider>() ? null : GetIt.I.registerSingleton<FormProvider>(FormProvider(), signalsReady: true);
     // GetIt.I.isRegistered<LocationProvider>() ? null : GetIt.I.registerSingleton<LocationProvider>(LocationProvider(), signalsReady: true);
     notiJwttokenEvent.addListener(notiEventListener);
-
 
     // _handleIncomingLinks();
     _handleInitialUri();
@@ -931,7 +928,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
         String? link = pref.getString('link');
 
-        if(link != null && link != "")
+        if(link != null && link != "" && defaultTargetPlatform == TargetPlatform.iOS)
         {
           var parts = link?.split('/');
           pref.setString('link', '');

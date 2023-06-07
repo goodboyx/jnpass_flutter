@@ -434,6 +434,8 @@ class HomePageState extends State<HomePage> {
 
       apiResponse = value;
 
+      debugPrint('apiError ${apiResponse.apiError}');
+
       if((apiResponse.apiError).error == "9") {
 
         final responseData = json.decode(apiResponse.data.toString());

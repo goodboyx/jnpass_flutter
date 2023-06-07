@@ -273,8 +273,6 @@ class ProfilePageState extends State<ProfilePage> {
                                     width: 100,
                                     child: TextButton(
                                       onPressed: () {
-                                        debugPrint('ssss');
-
                                         Navigator.of(context, rootNavigator: true).push(
                                             MaterialPageRoute(builder: (context) => const CertPage())
                                         );

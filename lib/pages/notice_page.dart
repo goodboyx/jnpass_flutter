@@ -43,41 +43,28 @@ class NoticePageState extends State<NoticePage> {
       prefs = value;
       jwtToken = prefs.getString('jwt_token') ?? "";
 
-      dataBoardCate();
-      dataBoard(1, true);
+      // dataBoardCate();
     });
 
+    NoticeBoardData.items.clear();
+    dataBoard(1, true);
+
+    // maxScrollExtent = 스크롤 맨 밑
+    // minScrollExtent = 스크롤 맨 위
+    // 화면 끝에 닿았을 때 이루어질 동작
     scBoard.addListener(() {
       if (scBoard.offset >= scBoard.position.maxScrollExtent && !scBoard.position.outOfRange) {
-        // if (scBoard.position.pixels ==
-        //     scBoard.position.maxScrollExtent) {
-
-        if(kDebug)
-        {
-          debugPrint('$totalPage : $page ');
-        }
 
         setState(() {
-          if(totalPage > page) {
-            isLoading = true;
-          }
-          else
-          {
-            isLoading = false;
-          }
-
           if (isLoading) {
-            // 화면 끝에 닿았을 때 이루어질 동작
             page = page + 1;
 
-            if(totalPage < limit) {
+            if (totalPage < page) {
               page = totalPage;
             }
-            else
-            {
+            else {
               dataBoard(page, false);
             }
-
           }
         });
 
@@ -129,42 +116,21 @@ class NoticePageState extends State<NoticePage> {
   Future<void> dataBoard(int page, bool init) async {
 
     final parameters = {"page": page.toString(), "limit": limit.toString(), "jwt_token":jwtToken};
+
+    debugPrint(parameters.toString());
+
     JsonApi.getApi("rest/board/notice", parameters).then((value) {
       ApiResponse apiResponse = ApiResponse();
 
       apiResponse = value;
 
       if((apiResponse.apiError).error == "9") {
-        NoticeBoardData.items.clear();
 
         final responseData = json.decode(apiResponse.data.toString());
         if(kDebug)
         {
           debugPrint('data ${apiResponse.data}');
         }
-
-        // if(responseData['code'].toString() == "101")
-        // {
-        //   prefs.remove('jwt_token');
-        //
-        //   Navigator.of(context,rootNavigator: true).push(
-        //     MaterialPageRoute(builder: (context) =>
-        //     const LoginPage()),).then((value){
-        //   });
-        //
-        //   if(responseData['message'] != '')
-        //   {
-        //     Fluttertoast.showToast(
-        //         msg: responseData['message'],
-        //         toastLength: Toast.LENGTH_SHORT,
-        //         gravity: ToastGravity.BOTTOM,
-        //         timeInSecForIosWeb: 1,
-        //         backgroundColor: Colors.red,
-        //         textColor: Colors.white,
-        //         fontSize: 13.0
-        //     );
-        //   }
-        // }
 
         if(responseData['code'].toString() == "0")
         {
@@ -175,8 +141,7 @@ class NoticePageState extends State<NoticePage> {
               NoticeBoardData.items = List.from(responseData['items'])
                   .map<BoardModel>((item) => BoardModel.fromJson(item))
                   .toList();
-            }
-            else {
+            } else {
               NoticeBoardData.items += List.from(responseData['items'])
                   .map<BoardModel>((item) => BoardModel.fromJson(item))
                   .toList();
@@ -187,11 +152,19 @@ class NoticePageState extends State<NoticePage> {
             if(mounted)
             {
               setState(() {
-
+                totalPage = responseData['total_page'];
+                isLoading = true;
               });
             }
-
           }
+
+          if(NewsBoardData.items.length.toString() == "0")
+          {
+            setState(() {
+              isLoading = true;
+            });
+          }
+
         }
       }
       else
