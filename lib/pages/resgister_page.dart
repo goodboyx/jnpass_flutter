@@ -647,7 +647,6 @@ class RegisterPageState extends State<RegisterPage> {
                                           color: kButtonColor,
                                           child: TextButton(
                                             onPressed: () {
-                                              debugPrint('sdf');
                                               final parameters = {"sender_hp": hpController.text, "sms_id": "jnpass", "sms_pw": "qhrehd@ss"};
                                               JsonApi.postApi("rest/cert_phone", parameters).then((value) {
                                                 ApiResponse apiResponse = ApiResponse();
@@ -664,7 +663,11 @@ class RegisterPageState extends State<RegisterPage> {
                                                 if((apiResponse.apiError).error == "9") {
 
                                                   final responseData = json.decode(apiResponse.data.toString());
-                                                  debugPrint('data ${apiResponse.data}');
+
+                                                  if(kDebug)
+                                                  {
+                                                    debugPrint('data ${apiResponse.data}');
+                                                  }
 
                                                   if(responseData['message'] != '')
                                                   {
@@ -798,7 +801,11 @@ class RegisterPageState extends State<RegisterPage> {
                                                 if((apiResponse.apiError).error == "9") {
 
                                                   final responseData = json.decode(apiResponse.data.toString());
-                                                  debugPrint('data ${apiResponse.data}');
+
+                                                  if(kDebug)
+                                                  {
+                                                    debugPrint('data ${apiResponse.data}');
+                                                  }
 
                                                   if(responseData['message'] != '')
                                                   {
@@ -1280,7 +1287,11 @@ class RegisterPageState extends State<RegisterPage> {
         if((apiResponse.apiError).error == "9") {
 
           final responseData = json.decode(apiResponse.data.toString());
-          debugPrint('data ${apiResponse.data}');
+
+          if(kDebug)
+          {
+            debugPrint('data ${apiResponse.data}');
+          }
 
           if(responseData['message'] != '')
           {
@@ -1294,10 +1305,10 @@ class RegisterPageState extends State<RegisterPage> {
                 fontSize: 13.0
             );
 
-            prefs.setString('jwt_token', responseData['jwt_token']);
+            prefs.setString('jwt_token', responseData['jwt_token'].toString());
 
-            Navigator.pop(context, "");
-            Navigator.pop(context, "");
+            Navigator.pop(context, "regis_ok");
+            // Navigator.pop(context, "regis_ok");
           }
         }
         else

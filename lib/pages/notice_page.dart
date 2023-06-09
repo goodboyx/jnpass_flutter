@@ -160,9 +160,13 @@ class NoticePageState extends State<NoticePage> {
 
           if(NewsBoardData.items.length.toString() == "0")
           {
-            setState(() {
-              isLoading = true;
-            });
+            if(mounted)
+            {
+              setState(() {
+                isLoading = true;
+              });
+            }
+
           }
 
         }

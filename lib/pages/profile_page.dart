@@ -77,14 +77,25 @@ class ProfilePageState extends State<ProfilePage> {
           {
             isLoading = true;
             mbData = responseData['data'];
-            mb_nick = mbData['mb_nick'];
-            textEditingController.text = mb_nick;
-            mbImg = '$mbImgUrl/${mbData['mb_id']}/${mbData['mb_img']}';
 
-            reloadData();
-            setState(() {
+            if(mbData['mb_id'] == null || mbData['mb_nick'] == null)
+            {
+              prefs.remove('jwt_token');
 
-            });
+              Navigator.of(context,rootNavigator: true).push(
+                MaterialPageRoute(builder: (context) =>
+                const LoginPage()),).then((value){
+
+              });
+            }
+            else
+            {
+              mb_nick = mbData['mb_nick'];
+              textEditingController.text = mb_nick;
+              mbImg = '$mbImgUrl/${mbData['mb_id']}/${mbData['mb_img']}';
+
+              reloadData();
+            }
           }
           else
           {
@@ -127,23 +138,22 @@ class ProfilePageState extends State<ProfilePage> {
 
 
   reloadData() async {
+
     setState(() {
+        meLoc  = prefs.getString('me_loc') ?? '0';
 
-      meLoc  = prefs.getString('me_loc') ?? '0';
+        if(meLoc != "0")
+        {
+          areaPositon = areaList.indexWhere((element) => element["id"] == meLoc);
+          debugPrint("areaPositon : $areaPositon");
 
-      if(meLoc != "0")
-      {
-        areaPositon = areaList.indexWhere((element) => element["id"] == meLoc);
-        debugPrint("areaPositon : $areaPositon");
-
-        setState(() {
-          if(areaPositon != -1)
-          {
-            location = areaList[areaPositon]['val'];
-          }
-        });
-      }
-
+          setState(() {
+            if(areaPositon != -1)
+            {
+              location = areaList[areaPositon]['val'];
+            }
+          });
+        }
     });
 
   }

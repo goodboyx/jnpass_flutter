@@ -124,6 +124,7 @@ class LoginPageState extends State<LoginPage> {
               onSubmitted: (__){
                 if(action == 'action')
                 {
+                  FocusScope.of(context).nextFocus();
                   _submitButton();
                 }
               },
@@ -406,13 +407,18 @@ class LoginPageState extends State<LoginPage> {
                                             MaterialPageRoute(builder: (context) =>
                                                 const RegisterPage()),).then((value){
 
+                                            debugPrint(value);
+
                                             if(value != null)
                                             {
-                                              if(value['mb_id'] != "")
+                                              if(value.toString() == "regis_ok")
+                                              {
+                                                Navigator.pushNamed(context, '/');
+                                              }
+                                              else
                                               {
                                                 Navigator.pop(context, value);
                                               }
-
                                             }
 
                                           });

@@ -68,8 +68,11 @@ const MethodChannel platform =
 MethodChannel('dexterx.dev/flutter_local_notifications_example');
 
 int todaySteps = 0;
+String _status = '';
 // 네이티브와 EventChannel로 연결하는 부분임을 알수있다.
 // 백그라운드 으로 step_count를 통해서 전달함
+// 핸드폰이 켜진 순간부터 지금까지의 걸음 수를 return한다. 구형폰은
+// 핸드폰이 재부팅되면 걸음 수는 0으로 초기화된다. 안되는 폰도 있음
 const EventChannel stepDetectionChannel = EventChannel('step_detection');
 const stepCountChannel = EventChannel('step_count');
 late StreamSubscription stepSubscription;
@@ -247,7 +250,7 @@ Future<void> appTokenUpdate() async {
     atDevice = 'A';
   }
 
-  final parameters = {"udid": uuid.v4(), "device": atDevice, "token": token.toString(), "token": token.toString(), "appver":appVer, "jwt_token" : jwtToken};
+  final parameters = {"udid": uuid.v4(), "device": atDevice, "token": token.toString(), "appver":appVer, "jwt_token" : jwtToken};
   JsonApi.postApi("rest/app_token", parameters).then((value) {
     ApiResponse apiResponse = ApiResponse();
 
@@ -491,63 +494,93 @@ Future<void> initializeService() async {
 
     todaySteps = pref.getInt('todaySteps') ?? 0;
 
-    flutterLocalNotificationsPlugin.show(
-      888,
-      '업데이트 중...',
-      '하루에 10,000 걸음 우리동네 SOS',
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'my_foreground',
-          'MY FOREGROUND SERVICE',
-          icon: 'ic_bg_service_small',
-          ongoing: true,
+    if(Platform.isAndroid)
+    {
+      flutterLocalNotificationsPlugin.show(
+        888,
+        '업데이트 중...',
+        '하루에 10,000v 걸음 우리동네 SOS',
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'my_foreground',
+            'MY FOREGROUND SERVICE',
+            icon: 'ic_bg_service_small',
+            ongoing: true,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
   });
 
 }
 
 Future<void> step_count(value) async {
+
   SharedPreferences prefs = await SharedPreferences.getInstance();
   final dateStr = DateFormat('yyyyMMdd').format(DateTime.now());
   int todayDayNo = int.parse(dateStr);
 
-  int savedStepCount = prefs.getInt('savedStepCount') ?? 0;
-  int lastDaySaved = prefs.getInt('lastDaySaved') ?? 0;
+  int savedStepCount = prefs.getInt('savedStepCount2') ?? 0;
+  int lastDaySaved = prefs.getInt('lastDaySaved2') ?? 0;
   int todaySteps = prefs.getInt('todaySteps') ?? 0;
-  int lastValue = prefs.getInt('stepsLastValue') ?? 0;
-  prefs.setInt('stepsLastValue', value);
+  int lastValue = prefs.getInt('stepsLastValue2') ?? 0;
 
   // device reboot
   if (savedStepCount > value) {
-    prefs.setInt('savedStepCount', 0);
+    prefs.setInt('savedStepCount2', 0);
     savedStepCount = 0;
   }
 
   // next day
   if (todayDayNo > lastDaySaved) {
-    prefs.setInt('lastDaySaved', todayDayNo);
-    prefs.setInt('savedStepCount', value);
+    prefs.setInt('lastDaySaved2', todayDayNo);
+    prefs.setInt('savedStepCount2', value);
     prefs.setInt('todaySteps', 0);
     savedStepCount = value;
     todaySteps = 0;
   }
 
-  if (savedStepCount == 0 && todaySteps > value) {
-    if (value < 10) {
-      prefs.setInt('todaySteps', value + todaySteps);
-    } else {
-      prefs.setInt('todaySteps', value - lastValue + todaySteps);
-    }
-  } else {
+  debugPrint('savedStepCount2 v $savedStepCount $value $todaySteps $lastValue');
+
+  if (value > savedStepCount) {
     prefs.setInt('todaySteps', value - savedStepCount);
+
+    // 재부팅되면 0으로 초기화 되기 때문에 저장된 오늘 걸음수와 걸음수 저장
+    if (todaySteps > value) {
+      debugPrint('cccccc');
+      if(lastValue == 0)
+      {
+        lastValue = todaySteps;
+        prefs.setInt('stepsLastValue2', lastValue);
+      }
+
+      prefs.setInt('todaySteps', value + lastValue);
+    }
+
+  }
+  else
+  {
+    debugPrint('savedStepCounta2 v $savedStepCount $value $todaySteps');
+
+    if (todaySteps > value) {
+      if(lastValue == 0)
+      {
+        lastValue = todaySteps;
+        prefs.setInt('stepsLastValue2', todaySteps);
+      }
+      prefs.setInt('todaySteps', value + todaySteps);
+    }
+    else
+    {
+      prefs.setInt('todaySteps', value);
+    }
   }
 
   todaySteps = prefs.getInt('todaySteps') ?? 0;
   debugPrint('step_count v $todaySteps');
 
+  // ISO 작업시 주석 처리
   var f = NumberFormat('###,###,###,###');
 
   flutterLocalNotificationsPlugin.show(
@@ -564,10 +597,11 @@ Future<void> step_count(value) async {
     ),
   );
 
+
 }
 
 Future<void> step_detection(value) async {
-
+  print('step_detection $value');
 }
 
 void onStepCount(StepCount event) {
@@ -576,8 +610,8 @@ void onStepCount(StepCount event) {
   pref.reload();
   int todaySteps = pref.getInt("todaySteps") ?? 0;
   stepProvider.setStep(todaySteps);
-  debugPrint('onStepCount $todaySteps');
 
+  debugPrint('onStepCount $todaySteps');
 }
 
 void onStepCountError(error) {
@@ -589,6 +623,8 @@ void onPedestrianStatusChanged(PedestrianStatus event) {
   {
     debugPrint('onPedestrianStatusChanged: ${event.status}');
   }
+
+  _status = event.status;
 
   if(event.status.toString() == "stopped")
   {
@@ -663,6 +699,7 @@ Future<void> onStart(ServiceInstance service) async {
   debugPrint('onStart');
   stepSubscription = stepCountChannel.receiveBroadcastStream().listen(step_count);
   stepDectSubscription = stepDetectionChannel.receiveBroadcastStream().listen(step_detection);
+
   /*
   Timer.periodic(const Duration(seconds: 1), (timer) async {
     if (service is AndroidServiceInstance) {
@@ -781,7 +818,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late String todayStep = "0";
   int selectedIndex = 0;
   NotiJwttokenEvent notiJwttokenEvent = NotiJwttokenEvent();
-
+  String platform = Platform.isAndroid ? "a" : "i";
   Uri? _initialUri;
   Uri? _latestUri;
 
@@ -855,7 +892,6 @@ class _MyHomePageState extends State<MyHomePage> {
             // debugPrint('parts $parts');
             if(parts![1].isNotEmpty)
             {
-
               SharedPreferences.getInstance().then((value) async {
                 pref = value;
                 debugPrint('setString link $initialMessage');
@@ -908,14 +944,14 @@ class _MyHomePageState extends State<MyHomePage> {
       pref = value;
       jwtToken = pref.getString('jwt_token') ?? "";
 
-      int lastDaySaved = pref.getInt('lastDaySaved') ?? 0;
+      int lastDaySaved = pref.getInt('lastDaySaved2') ?? 0;
       final dateStr = DateFormat('yyyyMMdd').format(DateTime.now());
       int todayDayNo = int.parse(dateStr);
 
       if (todayDayNo > lastDaySaved) {
-        pref.setInt('lastDaySaved', todayDayNo);
-        pref.setInt('todaySteps', 0);
-        todaySteps = 0;
+        // pref.setInt('lastDaySaved', todayDayNo);
+        // todaySteps = 0;
+        // pref.setInt('todaySteps', todaySteps);
       }
 
       initPlatformState();
@@ -959,7 +995,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
   }
-
 
   // void _handleIncomingLinks() {
   //   if (!kIsWeb) {
@@ -1074,7 +1109,6 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
   }
-
 
   void notiEventListener() {
     // Current class name print
@@ -1203,8 +1237,8 @@ class _MyHomePageState extends State<MyHomePage> {
           return Popover(
             child: Column(
               children: [
-                Row(
-                    children: const [
+                const Row(
+                    children: [
                       Padding(
                         padding: EdgeInsets.symmetric(
                             horizontal: 16.0,
@@ -1450,5 +1484,22 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         )
     );
+  }
+}
+
+class Steps {
+  late int previousSteps;
+  late int currentSteps;
+  final DateTime startAt;
+  late final DateTime finishAt;
+
+  Steps({required this.startAt}) {
+    finishAt = startAt.add(const Duration(days: 1));
+  }
+
+  static Steps byTodaySteps() {
+    final now = DateTime.now();
+
+    return Steps(startAt: DateTime(now.year, now.month, now.day));
   }
 }

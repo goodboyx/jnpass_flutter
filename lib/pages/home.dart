@@ -16,6 +16,7 @@ import '../common.dart';
 import '../models/apiResponse.dart';
 import '../models/bannermodel.dart';
 import '../models/boardmodel.dart';
+import '../provider/notiEvent.dart';
 import '../util.dart';
 import '../widgets/sosAppBar.dart';
 import 'consultWrite.dart';
@@ -35,6 +36,7 @@ class HomePageState extends State<HomePage> {
   late String step = '0';
   StepProvider stepProvider = StepProvider();
   bool isLoading = false;
+  NotiEvent notiEvent = NotiEvent();
 
   @override
   void initState() {
@@ -58,6 +60,8 @@ class HomePageState extends State<HomePage> {
     stepProvider.addListener(stepEventListener);
 
     dataAdSlide();
+
+    notiEvent.addListener(notiEventListener);
 
     super.initState();
   }
@@ -232,7 +236,6 @@ class HomePageState extends State<HomePage> {
                                                 Navigator.of(context,rootNavigator: true).push(
                                                     MaterialPageRoute(builder: (context) =>
                                                         NewsView(wrId:BoardData.items[index].wr_id))).then((value) {
-                                                          debugPrint('value : $value');
 
                                                           if(value =="reload")
                                                           {
@@ -421,6 +424,7 @@ class HomePageState extends State<HomePage> {
   @override
   void dispose() {
     stepProvider.removeListener(stepEventListener);
+    notiEvent.removeListener(notiEventListener);
     super.dispose();
   }
 
@@ -433,8 +437,6 @@ class HomePageState extends State<HomePage> {
       ApiResponse apiResponse = ApiResponse();
 
       apiResponse = value;
-
-      debugPrint('apiError ${apiResponse.apiError}');
 
       if((apiResponse.apiError).error == "9") {
 
@@ -480,7 +482,10 @@ class HomePageState extends State<HomePage> {
   void dataConsult() {
     BoardData.items.clear();
 
-    final parameters = {"page": "1", "limit": "4", "jwt_token":jwtToken};
+    final parameters = {"page": "1", "limit": "4", "jwt_token":jwtToken, "me_loc":meLoc};
+
+    debugPrint(parameters.toString());
+
     JsonApi.getApi("rest/board/news", parameters).then((value) {
       ApiResponse apiResponse = ApiResponse();
 
@@ -526,18 +531,23 @@ class HomePageState extends State<HomePage> {
       }
 
     });
+  }
 
-
+  void notiEventListener() {
+    // Current class name print
+    debugPrint('main notiEventListener ${notiEvent.msg}');
+    dataConsult();
   }
 
   // provider 걸음수 함수
   void stepEventListener() {
     // Current class name print
     // if (mounted) {
-    // if(kDebug)
-    // {
+    if(kDebug)
+    {
       debugPrint('home step ${stepProvider.getStep()}');
-    // }
+    }
+
     var f = NumberFormat('###,###,###,###');
 
     setState(() {

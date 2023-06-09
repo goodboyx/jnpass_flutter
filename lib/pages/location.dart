@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../api/jsonapi.dart';
 import '../common.dart';
 import '../constants.dart';
@@ -17,9 +18,17 @@ class Location extends StatefulWidget {
 }
 
 class LocationState extends State<Location> {
+  late SharedPreferences prefs;
+  String jwtToken = '';
 
   @override
   void initState() {
+
+    SharedPreferences.getInstance().then((value) async {
+      prefs = value;
+      jwtToken = prefs.getString('jwt_token') ?? "";
+    });
+
     super.initState();
   }
 
@@ -42,6 +51,8 @@ class LocationState extends State<Location> {
                 color: kButtonColor,
                 onPressed: () {
                   meLoc = widget.meLoc.toString();
+
+                  debugPrint('area $meLoc');
 
                   final parameters = {"jwt_token": jwtToken, "area": meLoc};
                   JsonApi.postApi("rest/area/member", parameters).then((value) {
@@ -72,6 +83,52 @@ class LocationState extends State<Location> {
                               fontSize: 13.0
                           );
                         }
+
+                        // 지역이 변경하면 jwt_token 다시 업데이트 한다.
+                        if(jwtToken.toString() != "")
+                        {
+                          final parameters = {"jwt_token": jwtToken};
+                          JsonApi.getApi("rest/jwt_token", parameters).then((value) {
+                            ApiResponse apiResponse = ApiResponse();
+
+                            apiResponse = value;
+
+                            if((apiResponse.apiError).error == "9") {
+
+                              final responseData = json.decode(apiResponse.data.toString());
+
+                              if(kDebug)
+                              {
+                                debugPrint('data ${apiResponse.data} ${responseData['code']}');
+                              }
+
+                              if(responseData['code'].toString() == "0")
+                              {
+                                if(mounted)
+                                {
+                                  setState(() {
+                                    prefs.setString('jwt_token', responseData['jwt_token']);
+                                  });
+                                }
+                              }
+                            }
+                            else
+                            {
+                              Fluttertoast.showToast(
+                                  msg: (apiResponse.apiError).msg,
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  timeInSecForIosWeb: 1,
+                                  backgroundColor: Colors.red,
+                                  textColor: Colors.white,
+                                  fontSize: 13.0
+                              );
+                            }
+
+                          });
+
+                        }
+
 
                       }
                       else
