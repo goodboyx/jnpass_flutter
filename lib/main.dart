@@ -35,6 +35,7 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:version/version.dart';
 
 import 'api/jsonapi.dart';
 import 'common.dart';
@@ -517,38 +518,47 @@ Future<void> initializeService() async {
 
 Future<void> step_count(value) async {
 
+  debugPrint('---- step_count ----');
   SharedPreferences prefs = await SharedPreferences.getInstance();
   final dateStr = DateFormat('yyyyMMdd').format(DateTime.now());
   int todayDayNo = int.parse(dateStr);
 
-  int savedStepCount = prefs.getInt('savedStepCount2') ?? 0;
-  int lastDaySaved = prefs.getInt('lastDaySaved2') ?? 0;
+  // 접속시 step 정보를 담기 위한 변수이고 재부팅시 초기화 및 다음달로 넘어걸때 step 값을 다시 저장함
+  int savedStepCount = prefs.getInt('savedStepCount') ?? 0;
+  int lastDaySaved = prefs.getInt('lastDaySaved') ?? 0;
   int todaySteps = prefs.getInt('todaySteps') ?? 0;
   int lastValue = prefs.getInt('stepsLastValue2') ?? 0;
 
   // device reboot
   if (savedStepCount > value) {
-    prefs.setInt('savedStepCount2', 0);
+    prefs.setInt('savedStepCount', 0);
     savedStepCount = 0;
   }
 
   // next day
   if (todayDayNo > lastDaySaved) {
-    prefs.setInt('lastDaySaved2', todayDayNo);
-    prefs.setInt('savedStepCount2', value);
+    prefs.setInt('lastDaySaved', todayDayNo);
+    prefs.setInt('savedStepCount', value);
     prefs.setInt('todaySteps', 0);
     savedStepCount = value;
     todaySteps = 0;
   }
 
-  debugPrint('savedStepCount2 v $savedStepCount $value $todaySteps $lastValue');
+  debugPrint('savedStepCount v $savedStepCount $value $todaySteps $lastValue');
+
+  if(savedStepCount == 0)
+  {
+    savedStepCount = value;
+    pref.setInt('savedStepCount', value);
+    prefs.setInt('todaySteps', 0);
+  }
 
   if (value > savedStepCount) {
+
     prefs.setInt('todaySteps', value - savedStepCount);
 
     // 재부팅되면 0으로 초기화 되기 때문에 저장된 오늘 걸음수와 걸음수 저장
     if (todaySteps > value) {
-      debugPrint('cccccc');
       if(lastValue == 0)
       {
         lastValue = todaySteps;
@@ -569,11 +579,11 @@ Future<void> step_count(value) async {
         lastValue = todaySteps;
         prefs.setInt('stepsLastValue2', todaySteps);
       }
-      prefs.setInt('todaySteps', value + todaySteps);
+      prefs.setInt('todaySteps', value + lastValue);
     }
     else
     {
-      prefs.setInt('todaySteps', value);
+      // prefs.setInt('todaySteps', value);
     }
   }
 
@@ -608,7 +618,101 @@ void onStepCount(StepCount event) {
   sleep(const Duration(milliseconds: 500));
 
   pref.reload();
-  int todaySteps = pref.getInt("todaySteps") ?? 0;
+
+  int value = event.steps;
+
+  debugPrint('------ onStepCount ------');
+
+  final dateStr = DateFormat('yyyyMMdd').format(DateTime.now());
+  int todayDayNo = int.parse(dateStr);
+
+  int savedStepCount = pref.getInt('savedStepCount') ?? 0;
+  int lastDaySaved = pref.getInt('lastDaySaved') ?? 0;
+  int todaySteps = pref.getInt('todaySteps') ?? 0;
+  int lastValue = pref.getInt('stepsLastValue2') ?? 0;
+
+  debugPrint('savedStepCount v $lastDaySaved $savedStepCount $value $todaySteps $lastValue');
+
+  // device reboot
+  if (savedStepCount > value) {
+    pref.setInt('savedStepCount', 0);
+    savedStepCount = 0;
+  }
+
+  // next day
+  if (todayDayNo > lastDaySaved) {
+    pref.setInt('lastDaySaved', todayDayNo);
+    pref.setInt('savedStepCount', value);
+    pref.setInt('todaySteps', 0);
+    savedStepCount = value;
+    todaySteps = 0;
+  }
+
+  debugPrint('savedStepCount v $savedStepCount $value $todaySteps $lastValue');
+
+  if(savedStepCount == 0)
+  {
+    savedStepCount = value;
+    pref.setInt('savedStepCount', value);
+    pref.setInt('todaySteps', 0);
+  }
+
+  if (value > savedStepCount) {
+
+    pref.setInt('todaySteps', value - savedStepCount);
+
+    // 재부팅되면 0으로 초기화 되기 때문에 저장된 오늘 걸음수와 걸음수 저장
+    if (todaySteps > value) {
+
+      if(lastValue == 0)
+      {
+        lastValue = todaySteps;
+        pref.setInt('stepsLastValue2', lastValue);
+      }
+
+      pref.setInt('todaySteps', value + lastValue);
+    }
+
+  }
+  else
+  {
+    debugPrint('savedStepCounta2 v $savedStepCount $value $todaySteps');
+
+    if (todaySteps > value) {
+      if(lastValue == 0)
+      {
+        lastValue = todaySteps;
+        pref.setInt('stepsLastValue2', todaySteps);
+      }
+      pref.setInt('todaySteps', value + lastValue);
+    }
+    else
+    {
+      pref.setInt('todaySteps', value);
+    }
+  }
+
+  todaySteps = pref.getInt('todaySteps') ?? 0;
+  debugPrint('step_count v $todaySteps');
+
+  // ISO 작업시 주석 처리
+  var f = NumberFormat('###,###,###,###');
+
+  flutterLocalNotificationsPlugin.show(
+    888,
+    '${f.format(todaySteps)} 걸음',
+    '하루에 10,000 걸음 우리동네 SOS',
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'my_foreground',
+        'MY FOREGROUND SERVICE',
+        icon: 'ic_bg_service_small',
+        ongoing: true,
+      ),
+    ),
+  );
+
+  todaySteps = pref.getInt("todaySteps") ?? 0;
   stepProvider.setStep(todaySteps);
 
   debugPrint('onStepCount $todaySteps');
@@ -696,7 +800,7 @@ Future<void> onStart(ServiceInstance service) async {
 
   });
 
-  debugPrint('onStart');
+  print('onStart');
   stepSubscription = stepCountChannel.receiveBroadcastStream().listen(step_count);
   stepDectSubscription = stepDetectionChannel.receiveBroadcastStream().listen(step_detection);
 
@@ -931,34 +1035,38 @@ class _MyHomePageState extends State<MyHomePage> {
       _handleNotification(message.data);
     });
 
+    // 만보기 권한설정 및 이벤트 설정
+    initPlatformState();
+
     _isAndroidPermissionGranted();
     _requestPermissions();
-    _configureDidReceiveLocalNotificationSubject();
-    _configureSelectNotificationSubject();
+    // _configureDidReceiveLocalNotificationSubject();
+    // _configureSelectNotificationSubject();
 
-    // 업데이트 어플 설치 여부
-    // initPackageInfo();
     splash();
 
     SharedPreferences.getInstance().then((value) async {
       pref = value;
       jwtToken = pref.getString('jwt_token') ?? "";
 
-      int lastDaySaved = pref.getInt('lastDaySaved2') ?? 0;
+      int lastDaySaved = pref.getInt('lastDaySaved') ?? 0;
       final dateStr = DateFormat('yyyyMMdd').format(DateTime.now());
       int todayDayNo = int.parse(dateStr);
 
+      // 시작시 다음날이면 초기화
       if (todayDayNo > lastDaySaved) {
-        // pref.setInt('lastDaySaved', todayDayNo);
-        // todaySteps = 0;
-        // pref.setInt('todaySteps', todaySteps);
+        pref.setInt('lastDaySaved', todayDayNo);
+        todaySteps = 0;
+        pref.setInt('todaySteps', todaySteps);
       }
-
-      initPlatformState();
 
     });
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+
+      // 상위 어플 업데이트 체크
+      updateApp();
+
       SharedPreferences.getInstance().then((value) async {
         pref = value;
 
@@ -1120,8 +1228,10 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-// 만보기 초기 설정
+  // 만보기 초기 설정
   Future<void> initPlatformState() async {
+
+    debugPrint('initPlatformState');
 
     // 안드로이드 상위 버전 때문에  대한 권한 설정
     PermissionStatus activityRecognitionEnabled = Platform.isAndroid ? await Permission.activityRecognition.status : await Permission.sensors.status; // Check if permission is granted
@@ -1136,20 +1246,20 @@ class _MyHomePageState extends State<MyHomePage> {
     _stepCountStream.listen(onStepCount).onError(onStepCountError);
   }
 
-
   Future<void> _isAndroidPermissionGranted() async {
-    if (Platform.isAndroid) {
-      final bool granted = await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-          ?.areNotificationsEnabled() ??
-          false;
+  if (Platform.isAndroid) {
+    final bool granted = await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>()
+        ?.areNotificationsEnabled() ??
+        false;
 
-      setState(() {
-        _notificationsEnabled = granted;
-      });
-    }
+    setState(() {
+      _notificationsEnabled = granted;
+    });
+
   }
+}
 
   Future<void> _requestPermissions() async {
     if (Platform.isIOS || Platform.isMacOS) {
@@ -1180,6 +1290,8 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         _notificationsEnabled = granted ?? false;
       });
+
+      initPlatformState();
     }
   }
 
@@ -1217,15 +1329,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _configureSelectNotificationSubject() {
     selectNotificationStream.stream.listen((String? payload) async {
-      debugPrint('payLoad :: $payload');
+      print('payLoad :: $payload');
       Map<String,dynamic> valueMap = Util.jsonStringToMap(payload!);
-      debugPrint('valueMap :: $valueMap');
+      print('valueMap :: $valueMap');
 
       _handleNotification(valueMap);
 
     });
   }
-
 
   // 접수 클릭시
   void centerLayer(BuildContext ctx) {
@@ -1305,7 +1416,6 @@ class _MyHomePageState extends State<MyHomePage> {
         }
     );
   }
-
 
   void bottomTapped(int index) {
 
@@ -1412,6 +1522,64 @@ class _MyHomePageState extends State<MyHomePage> {
 
   }
 
+// 앱 업데이트 스토어 버전체크
+  void updateApp() {
+
+    final parameters = {"": ""};
+    JsonApi.getApi("rest/appVer", parameters).then((value) {
+      ApiResponse apiResponse = ApiResponse();
+      apiResponse = value;
+
+      if ((apiResponse.apiError).error == "9") {
+        final responseData = json.decode(apiResponse.data.toString());
+
+        Version thisAppVersion = Version.parse(appVer);
+        Version stroeAppVersion = Platform.isAndroid ? Version.parse(responseData['android']) : Version.parse(responseData['ios']);
+
+        if(thisAppVersion < stroeAppVersion)
+        {
+          if(responseData['auto_update'] == 'Y')
+          {
+            _showDialog();
+          }
+        }
+
+        print('vvvv ${thisAppVersion.toString()} data ${stroeAppVersion.toString()}');
+
+      }
+    });
+  }
+
+// 업데이트 창 띄위기
+  Future<void> _showDialog() async {
+    String url =  Platform.isAndroid ? "https://play.google.com/store/apps/details?id=$APP_STORE_ID" : "https://itunes.apple.com/lookup?bundleId=$IOS_APP_STORE_ID";
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("어플 업데이트"),
+            content: const Text("해당 어플에 상위버전이 있습니다. 업데이트를 해주시길 바랍니다."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  if (!await launchUrl((Uri.parse(url)))) {
+                  throw Exception('스토어 링크 에러 $url');
+                  }
+                },
+                child: const Text('업데이트'),
+              ),
+            ],
+          );
+        }
+    );
+  }
 
   @override
   void dispose()
@@ -1485,21 +1653,7 @@ class _MyHomePageState extends State<MyHomePage> {
         )
     );
   }
+
+
 }
 
-class Steps {
-  late int previousSteps;
-  late int currentSteps;
-  final DateTime startAt;
-  late final DateTime finishAt;
-
-  Steps({required this.startAt}) {
-    finishAt = startAt.add(const Duration(days: 1));
-  }
-
-  static Steps byTodaySteps() {
-    final now = DateTime.now();
-
-    return Steps(startAt: DateTime(now.year, now.month, now.day));
-  }
-}

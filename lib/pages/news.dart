@@ -419,7 +419,7 @@ class NewsPageState extends State<NewsPage> {
                                                 // TODO: Change innermost Column (123)
                                                 children: <Widget>[
                                                   SizedBox (
-                                                      width: screenWidth - 160,
+                                                      width: NewsBoardData.items[index].thum != "" ? screenWidth - 160 : screenWidth - 20,
                                                       child: Column(
                                                           children: <Widget>[
                                                             Align(alignment: Alignment.topLeft,

@@ -203,6 +203,7 @@ class HomePageState extends State<HomePage> {
                               ),
                           ),
                           const SizedBox(height: 15),
+                          // 동네소식
                           Container(
                               height: 580,
                               color: Colors.transparent,
@@ -256,7 +257,7 @@ class HomePageState extends State<HomePage> {
                                                 // TODO: Change innermost Column (123)
                                                 children: <Widget>[
                                                   SizedBox (
-                                                    width: screenWidth - 160,
+                                                    width: BoardData.items[index].thum != "" ? screenWidth - 160 : screenWidth - 50,
                                                     child: Column(
                                                       crossAxisAlignment: CrossAxisAlignment.start,
                                                       children: <Widget>[
@@ -483,8 +484,6 @@ class HomePageState extends State<HomePage> {
     BoardData.items.clear();
 
     final parameters = {"page": "1", "limit": "4", "jwt_token":jwtToken, "me_loc":meLoc};
-
-    debugPrint(parameters.toString());
 
     JsonApi.getApi("rest/board/news", parameters).then((value) {
       ApiResponse apiResponse = ApiResponse();
