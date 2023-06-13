@@ -849,9 +849,9 @@ class NewsViewState extends State<NewsView> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('경고'),
-          content: SingleChildScrollView(
+          content: const SingleChildScrollView(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('해당 글을 하시겠습니까?'),
                 // Text('Would you like to approve of this message?'),
               ],

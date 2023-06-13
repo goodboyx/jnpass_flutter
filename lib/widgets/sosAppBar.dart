@@ -45,7 +45,6 @@ class SosAppBarState extends State<SosAppBar> {
         });
       }
 
-      debugPrint('meLoc $meLoc');
     });
 
     super.initState();

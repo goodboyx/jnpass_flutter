@@ -2,9 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jnpass/constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/jsonapi.dart';
 import '../models/apiResponse.dart';
@@ -12,7 +10,6 @@ import '../models/boardcategory.dart';
 import '../models/boardmodel.dart';
 import '../util.dart';
 import '../widgets/sosAppBar.dart';
-import 'login_page.dart';
 import 'noticeview.dart';
 
 class NoticePage extends StatefulWidget {
@@ -23,9 +20,6 @@ class NoticePage extends StatefulWidget {
 }
 
 class NoticePageState extends State<NoticePage> {
-  late final prefs;
-  String jwtToken = '';
-
   bool isLoading = false;
   int page = 1;
   int totalPage = 1;
@@ -38,13 +32,6 @@ class NoticePageState extends State<NoticePage> {
   @override
   void initState() {
     super.initState();
-
-    SharedPreferences.getInstance().then((value) async {
-      prefs = value;
-      jwtToken = prefs.getString('jwt_token') ?? "";
-
-      // dataBoardCate();
-    });
 
     NoticeBoardData.items.clear();
     dataBoard(1, true);
@@ -115,9 +102,7 @@ class NoticePageState extends State<NoticePage> {
 
   Future<void> dataBoard(int page, bool init) async {
 
-    final parameters = {"page": page.toString(), "limit": limit.toString(), "jwt_token":jwtToken};
-
-    debugPrint(parameters.toString());
+    final parameters = {"page": page.toString(), "limit": limit.toString(), "jwt_token":""};
 
     JsonApi.getApi("rest/board/notice", parameters).then((value) {
       ApiResponse apiResponse = ApiResponse();
@@ -191,21 +176,10 @@ class NoticePageState extends State<NoticePage> {
   @override
   Widget build(BuildContext context) {
     var screenWidth = MediaQuery.of(context).size.width;
-    var screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: const SosAppBar(),
-      body:
-        // (cateData.isEmpty)
-        // ?
-        // Container(
-        //   color: Colors.white,
-        //   child: const Center(
-        //     child: CircularProgressIndicator(),
-        //   ),
-        // )
-        // :
-        ListView.builder(
+      body: ListView.builder(
             itemCount: NoticeBoardData.items.length,
             controller: scBoard,
             itemBuilder: (context, index) {
