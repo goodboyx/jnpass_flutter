@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../api/jsonapi.dart';
 import '../common.dart';
@@ -174,10 +175,10 @@ class NoticeViewState extends State<NoticeView> {
                           if((apiResponse.apiError).error == "9") {
 
                             final responseData = json.decode(apiResponse.data.toString());
-                            if(kDebug)
-                            {
+                            // if(kDebug)
+                            // {
                               debugPrint('data ${apiResponse.data} ${responseData['code']}');
-                            }
+                            // }
 
                             if(mounted)
                             {
@@ -279,6 +280,32 @@ class NoticeViewState extends State<NoticeView> {
                           )
                       ),
                     ),
+                    (boardData['wr_link1'].toString() != "")
+                    ?
+                    Padding(
+                        padding:  const EdgeInsets.all(8.0),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  launchUrl(Uri.parse(boardData['wr_link1'].toString()));
+                                },
+                                label: const Text(' 링크클릭 '),
+                                icon: const Icon(Icons.link),
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                ),
+                              ),
+                            ]
+                        )
+                    )
+                    :
+                    Container(),
                   ],
                 )
             )

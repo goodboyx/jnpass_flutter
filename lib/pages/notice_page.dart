@@ -112,6 +112,7 @@ class NoticePageState extends State<NoticePage> {
       if((apiResponse.apiError).error == "9") {
 
         final responseData = json.decode(apiResponse.data.toString());
+
         if(kDebug)
         {
           debugPrint('data ${apiResponse.data}');
@@ -246,13 +247,6 @@ class NoticePageState extends State<NoticePage> {
                                                     padding: const EdgeInsets.only(left:10.0),
                                                     child:Image.network(NoticeBoardData.items[index].thum, fit:BoxFit.fitHeight, width: screenWidth))
                                             )),
-                                      // AspectRatio(
-                                      //   aspectRatio: 20 / 11,
-                                      //   child: GestureDetector(
-                                      //       child: Image.network(BoardData.items[index].thum, fit:BoxFit.fitWidth, width: screenWidth),
-                                      //
-                                      //   )
-                                      // )
                                     ]
                                 )
                             )
@@ -268,83 +262,6 @@ class NoticePageState extends State<NoticePage> {
               );
             },
         ),
-        // Column(
-        //     children: <Widget>[
-        //       // Expanded(
-        //       //     child: CustomScrollView(
-        //       //         controller: scCate,
-        //       //         slivers: <Widget>[
-        //       //           SliverToBoxAdapter(
-        //       //             child: SizedBox(
-        //       //               height: 70.0,
-        //       //               child: Container(
-        //       //                   color: const Color(0xFFEEEEEE),
-        //       //                   child: ListView.builder(
-        //       //                     scrollDirection: Axis.horizontal,
-        //       //                     itemBuilder: (context, index) {
-        //       //                       BoardCategory category = cateData[index];
-        //       //                       return GestureDetector(
-        //       //                           onTap: () {
-        //       //                             if(selected != category.id)
-        //       //                             {
-        //       //                               setState(() {
-        //       //                                 selected = category.id;
-        //       //                                 debugPrint('카테고리 클릭 : $selected');
-        //       //                               });
-        //       //                               dataBoard(1, true);
-        //       //                             }
-        //       //                           },
-        //       //                           child: Card(
-        //       //                             semanticContainer: true,
-        //       //                             clipBehavior: Clip
-        //       //                                 .antiAliasWithSaveLayer,
-        //       //                             shape: RoundedRectangleBorder(
-        //       //                               borderRadius: BorderRadius
-        //       //                                   .circular(10),
-        //       //                             ),
-        //       //                             color:
-        //       //                             (category.id == "9")
-        //       //                                 ? Colors.orange
-        //       //                                 :
-        //       //                             (category.id == selected)
-        //       //                                 ? const Color(0xFFA586BC)
-        //       //                                 :
-        //       //                             const Color(0xFFCCCCCC),
-        //       //                             elevation: 0.0,
-        //       //                             // 그림자 효과
-        //       //                             margin: const EdgeInsets.only(
-        //       //                                 top: 20,
-        //       //                                 bottom: 20,
-        //       //                                 left: 15),
-        //       //                             child: SizedBox(
-        //       //                               height: double.infinity,
-        //       //                               child: Center(
-        //       //                                 child: Padding(
-        //       //                                   padding: const EdgeInsets
-        //       //                                       .only(left: 10.0,
-        //       //                                       right: 10.0,
-        //       //                                       top: 6.0,
-        //       //                                       bottom: 6.0),
-        //       //                                   child: Text(
-        //       //                                       category.name,
-        //       //                                       style: const TextStyle(
-        //       //                                           color: Color(
-        //       //                                               0xFFFFFFFF), fontSize: 12)),
-        //       //                                 ),
-        //       //                               ),
-        //       //                             ),
-        //       //                           )
-        //       //                       );
-        //       //                     },
-        //       //                     itemCount: cateData.length,
-        //       //                   )
-        //       //               ),
-        //       //             ),
-        //       //           ),
-        //       //         ])
-        //       // ),
-        //     ]
-        // ),
       floatingActionButton: FloatingActionButton(
         heroTag: "kakao_btn",
         backgroundColor: Colors.transparent,

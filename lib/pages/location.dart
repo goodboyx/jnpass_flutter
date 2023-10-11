@@ -31,7 +31,14 @@ class LocationState extends State<Location> {
     });
 
     areaPositon = areaList.indexWhere((element) => element["id"] == widget.meLoc);
+
+    if(areaPositon == -1)
+    {
+      areaPositon = 0;
+    }
+
     loc = areaList[areaPositon]['val'];
+
     setState(() {
 
     });

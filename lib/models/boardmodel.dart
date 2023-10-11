@@ -63,6 +63,7 @@ class BoardModel {
       this.wr_is_like,
       this.is_me,
       this.wr_singo,
+      this.wr_link1,
       // this.wr_modify,
       this.total_count,
       this.total_page,
@@ -83,7 +84,7 @@ class BoardModel {
   // List<BoardFileModel> file;
   // String wr_facebook_user;
   // String wr_twitter_user;
-  // String wr_link1;
+  String wr_link1;
   String wr_area;
   String wr_mb_img;
   String wr_comment;
