@@ -120,7 +120,13 @@ class WalkState extends State<Walk> {
           title: const Text("포인트", textAlign: TextAlign.center,
             style: TextStyle(color: Colors.black, fontSize: 15),),
           backgroundColor: Colors.white,
-          // elevation: 0.0,
+          elevation: 0.0,
+          shape: const Border(
+            bottom: BorderSide(
+              color: Colors.grey,
+              width: 1,
+            ),
+          ),
           leading: IconButton(
             icon: const Icon(Icons.chevron_left),
             onPressed: () =>
@@ -139,58 +145,29 @@ class WalkState extends State<Walk> {
             scrollDirection:Axis.vertical,
             controller: scrollController,
             child: Container(
-              padding: const EdgeInsets.only(top: 15.0, left: 10.0, right: 10.0),
+              padding: const EdgeInsets.only(top: 15.0, left: 20.0, right: 20.0),
               // height: screenHeight,
               width: screenWidth,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Align(
-                    alignment: Alignment.center,
-                    child: Text("탄소중립걷기챌린지", textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-                  ),
                   // 오늘 나의 걸음
-                  Padding(
-                    padding: const EdgeInsets.only(left: 0.0, top: 0.0, right: 0.0),
-                      child: Row(
-                        children: [
-                          const Text("오늘 나의 걸음", textAlign: TextAlign.left,
-                            style: TextStyle(color: Color(0XFF292929), fontSize: 16, fontWeight: FontWeight.bold),),
-                          Expanded(
-                            child: Align(
-                                alignment: Alignment.centerRight,
-                                child: RichText(
-                                  text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: step.toString(),
-                                      style: const TextStyle(
-                                        color: Color(0XFFE97031),
-                                        fontSize: 36.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const TextSpan(
-                                      text: "걸음",
-                                      style: TextStyle(
-                                        color: Color(0XFFE97031),
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ]
-                              )
-                                )
-                            )
-                          ),
-                        ],
-                      )
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text("오늘의 탄소중립걷기 ", textAlign: TextAlign.center,
+                          style: TextStyle(color: Color(0XFF626262), fontFamily: 'SCDream', fontSize: 14, ),),
+                        Text(step.toString(), textAlign: TextAlign.center,
+                          style: const TextStyle(color: Color(0XFFE97031), fontFamily: 'SCDream', fontSize: 22, fontWeight: FontWeight.bold,),),
+                        const Text(" 걸음", textAlign: TextAlign.center,
+                          style: TextStyle(color: Color(0XFF626262), fontFamily: 'SCDream', fontSize: 14, ),),
+                      ],
                   ),
-
+                  const SizedBox(height: 10,),
                   // 오늘 나의 걸음 gage
                   Padding(
-                    padding: const EdgeInsets.only(left: 10.0, top: 10.0, right: 10.0),
+                    padding: const EdgeInsets.only(left: 10.0, top: 0.0, right: 0.0),
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 15),
                       child: SfLinearGauge(
@@ -210,546 +187,459 @@ class WalkState extends State<Walk> {
                     ),
                   ),
                   // 포인트 적립
-                  Container(
-                      padding: const EdgeInsets.only(top:10, bottom: 10, left: 20, right: 20),
-                      decoration: BoxDecoration(
-                        color: kPrimaryColor.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                      child: Column(
-                          // TODO: Center items on the card (123)
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Image.asset(
-                                  'assets/images/point.png',
-                                  width: 40,
-                                ),
-                                const Padding(padding: EdgeInsets.only(left: 15) ),
-                                const Text("5,000 걸음 걷기", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                                Expanded(child:
-                                Align(alignment: Alignment.topRight,
-                                    child: TextButton(
-                                      onPressed: () {
-                                        if(point1 && point1Complete == false)
-                                        {
-                                          final parameters = {"jwt_token":jwtToken, "money":"30"};
-                                          JsonApi.postApi("rest/step_money", parameters).then((value) {
-                                            ApiResponse apiResponse = ApiResponse();
-
-                                            apiResponse = value;
-
-                                            if((apiResponse.apiError).error == "9") {
-
-                                              final responseData = json.decode(apiResponse.data.toString());
-                                              debugPrint('data ${apiResponse.data}');
-
-                                              if(responseData['code'] == "101")
-                                              {
-                                                prefs.remove('jwt_token');
-
-                                                Navigator.of(context,rootNavigator: true).push(
-                                                  MaterialPageRoute(builder: (context) =>
-                                                  const LoginPage()),).then((value){
-
-                                                });
-
-                                                if(responseData['message'] != '')
-                                                {
-                                                  Fluttertoast.showToast(
-                                                      msg: responseData['message'],
-                                                      toastLength: Toast.LENGTH_SHORT,
-                                                      gravity: ToastGravity.BOTTOM,
-                                                      timeInSecForIosWeb: 1,
-                                                      backgroundColor: Colors.red,
-                                                      textColor: Colors.white,
-                                                      fontSize: 13.0
-                                                  );
-                                                }
-
-                                              }
-                                              else
-                                              {
-                                                if(responseData['return'].toString() == "true")
-                                                {
-                                                  point1 = false;
-                                                  point1Complete = true;
-
-                                                  reloadData();
-                                                  dataPoint(1, true);
-                                                }
-
-                                                if(responseData['message'] != '')
-                                                {
-                                                  Fluttertoast.showToast(
-                                                      msg: responseData['message'],
-                                                      toastLength: Toast.LENGTH_SHORT,
-                                                      gravity: ToastGravity.BOTTOM,
-                                                      timeInSecForIosWeb: 1,
-                                                      backgroundColor: Colors.red,
-                                                      textColor: Colors.white,
-                                                      fontSize: 13.0
-                                                  );
-                                                }
-
-                                              }
-
-
-                                            }
-                                            else
-                                            {
-                                              Fluttertoast.showToast(
-                                                  msg: (apiResponse.apiError).msg,
-                                                  toastLength: Toast.LENGTH_SHORT,
-                                                  gravity: ToastGravity.BOTTOM,
-                                                  timeInSecForIosWeb: 1,
-                                                  backgroundColor: Colors.red,
-                                                  textColor: Colors.white,
-                                                  fontSize: 13.0
-                                              );
-                                            }
-
-                                          });
-                                        }
-                                      },
-                                      style: TextButton.styleFrom(
-                                          foregroundColor: Colors.red,
-                                          elevation: 2,
-                                          backgroundColor: point1 ? const Color(0XFF98BF54) : const Color(0XFFC1C6C9)),
-                                      child: Text(
-                                        point1Complete ? '30P 완료' : '30P 적립',
-                                        style: const TextStyle(color: Colors.white, fontSize: 14),
-                                      ),
-                                    ),
-
-                                ))
-                              ]
-                          ),
-                            const SizedBox(height: 15,),
-                            Row(
-                                mainAxisSize: MainAxisSize.max,
-                                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Image.asset(
-                                    'assets/images/point.png',
-                                    width: 40,
-                                  ),
-                                  const Padding(padding: EdgeInsets.only(left: 15) ),
-                                  const Text("10,000 걸음 걷기", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                                  Expanded(child:
-                                  Align(alignment: Alignment.topRight,
-                                    child: TextButton(
-                                      onPressed: () {
-                                        if(point2 && point2Complete == false)
-                                        {
-                                          final parameters = {"jwt_token":jwtToken, "money":"70"};
-                                          JsonApi.postApi("rest/step_money", parameters).then((value) {
-                                            ApiResponse apiResponse = ApiResponse();
-
-                                            apiResponse = value;
-
-                                            if((apiResponse.apiError).error == "9") {
-
-                                              final responseData = json.decode(apiResponse.data.toString());
-                                              debugPrint('data ${apiResponse.data}');
-
-                                              if(responseData['code'] == "101")
-                                              {
-                                                prefs.remove('jwt_token');
-
-                                                Navigator.of(context,rootNavigator: true).push(
-                                                  MaterialPageRoute(builder: (context) =>
-                                                  const LoginPage()),).then((value){
-
-                                                });
-
-                                                if(responseData['message'] != '')
-                                                {
-                                                  Fluttertoast.showToast(
-                                                      msg: responseData['message'],
-                                                      toastLength: Toast.LENGTH_SHORT,
-                                                      gravity: ToastGravity.BOTTOM,
-                                                      timeInSecForIosWeb: 1,
-                                                      backgroundColor: Colors.red,
-                                                      textColor: Colors.white,
-                                                      fontSize: 13.0
-                                                  );
-                                                }
-
-                                              }
-                                              else
-                                              {
-                                                if(responseData['return'])
-                                                {
-                                                  reloadData();
-                                                  dataPoint(1, true);
-
-                                                  setState(() {
-                                                    point2 = false;
-                                                    point2Complete = true;
-                                                  });
-                                                }
-
-                                                if(responseData['message'] != '')
-                                                {
-                                                  Fluttertoast.showToast(
-                                                      msg: responseData['message'],
-                                                      toastLength: Toast.LENGTH_SHORT,
-                                                      gravity: ToastGravity.BOTTOM,
-                                                      timeInSecForIosWeb: 1,
-                                                      backgroundColor: Colors.red,
-                                                      textColor: Colors.white,
-                                                      fontSize: 13.0
-                                                  );
-                                                }
-                                              }
-                                            }
-                                            else
-                                            {
-                                              Fluttertoast.showToast(
-                                                  msg: (apiResponse.apiError).msg,
-                                                  toastLength: Toast.LENGTH_SHORT,
-                                                  gravity: ToastGravity.BOTTOM,
-                                                  timeInSecForIosWeb: 1,
-                                                  backgroundColor: Colors.red,
-                                                  textColor: Colors.white,
-                                                  fontSize: 13.0
-                                              );
-                                            }
-
-                                          });
-                                        }
-
-
-                                      },
-                                      style: TextButton.styleFrom(
-                                          foregroundColor: Colors.red,
-                                          elevation: 2,
-                                          backgroundColor: point2 ? const Color(0XFF98BF54) : const Color(0XFFC1C6C9)),
-                                      child: Text(
-                                        point2Complete ? '70P 완료' : '70P 적립',
-                                        style: const TextStyle(color: Colors.white, fontSize: 14),
-                                      ),
-                                    ),
-
-                                  ))
-                                ]
-                            ),
-                        ]
-                      )
-                    //  D9D9D9
-                  ),
-                  // 걸음포인트, 활동포인트
-                  SizedBox(
-                      width: size.width,
-                      child: Container(
-                        color: const Color(0xFFf4f4f4),
-                        child: Column(
+                  Column(
+                    // TODO: Center items on the card (123)
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                            mainAxisSize: MainAxisSize.max,
+                            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Padding(
-                                  padding: const EdgeInsets.only(left: 0.0, top: 10.0, right: 0.0, bottom: 0.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    // crossAxisAlignment: CrossAxisAlignment.center,
-                                    // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Flexible(
-                                        child: Container(
-                                            alignment: Alignment.center,
-                                            padding: const EdgeInsets.only(top:10, bottom: 5, left: 5, right: 5),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF98BF54),
-                                              borderRadius: BorderRadius.circular(20),
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              children: [
-                                                const SizedBox(height: 5),
-                                                const Text("걸음포인트", textAlign: TextAlign.center,
-                                                  style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 18),),
-                                                const SizedBox(height: 10),
-                                                Container(
-                                                  padding: const EdgeInsets.only(top:0, bottom: 0, left: 2, right: 2),
-                                                  height: 80,
-                                                  alignment: Alignment.center,
-                                                  decoration: BoxDecoration(
-                                                    color: const Color(0xFFFFFFFF),
-                                                    borderRadius: BorderRadius.circular(20),
-                                                  ),
-                                                  child: RichText(
-                                                      text: TextSpan(
-                                                          children: [
-                                                            TextSpan(
-                                                              text: step_money.toString(),
-                                                              style: const TextStyle(
-                                                                color: Color(0xFF292929),
-                                                                fontSize: 24.0,
-                                                                fontWeight: FontWeight.bold,
-                                                              ),
-                                                            ),
-                                                            const TextSpan(
-                                                              text: " P",
-                                                              style: TextStyle(
-                                                                color: Color(0xFF292929),
-                                                                fontSize: 14.0,
-                                                                fontWeight: FontWeight.bold,
-                                                              ),
-                                                            ),
-                                                          ]
-                                                      )
-                                                  ),
-                                                )
-                                              ],
-                                            )
-                                        ),
-                                      ),
-                                      const SizedBox(width: 5,),
-                                      Flexible(
-                                        child: Container(
-                                            alignment: Alignment.center,
-                                            padding: const EdgeInsets.only(top:10, bottom: 5, left: 5, right: 5),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF98BF54),
-                                              borderRadius: BorderRadius.circular(20),
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              children: [
-                                                const SizedBox(height: 5),
-                                                const Text("활동포인트", textAlign: TextAlign.center,
-                                                  style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 18),),
-                                                const SizedBox(height: 10),
-                                                Container(
-                                                  padding: const EdgeInsets.only(top:0, bottom: 0, left: 2, right: 2),
-                                                  height: 80,
-                                                  alignment: Alignment.center,
-                                                  decoration: BoxDecoration(
-                                                    color: const Color(0xFFFFFFFF),
-                                                    borderRadius: BorderRadius.circular(20),
-                                                  ),
-                                                  child: RichText(
-                                                      text: TextSpan(
-                                                          children: [
-                                                            TextSpan(
-                                                              text: active_money.toString(),
-                                                              style: const TextStyle(
-                                                                color: Color(0xFF292929),
-                                                                fontSize: 24.0,
-                                                                fontWeight: FontWeight.bold,
-                                                              ),
-                                                            ),
-                                                            const TextSpan(
-                                                              text: " P",
-                                                              style: TextStyle(
-                                                                color: Color(0xFF292929),
-                                                                fontSize: 14.0,
-                                                                fontWeight: FontWeight.bold,
-                                                              ),
-                                                            ),
-                                                          ]
-                                                      )
-                                                  ),
-                                                )
-                                              ],
-                                            )
-                                        ),
-                                      ),
-                                    ],
-                                )
+                              Expanded(
+                                  flex: 5,
+                                  child: TextButton(
+                                    onPressed: () {
+                                      if(point1 && point1Complete == false)
+                                      {
+                                        final parameters = {"jwt_token":jwtToken, "money":"30"};
+                                        JsonApi.postApi("rest/step_money", parameters).then((value) {
+                                          ApiResponse apiResponse = ApiResponse();
+
+                                          apiResponse = value;
+
+                                          if((apiResponse.apiError).error == "9") {
+
+                                            final responseData = json.decode(apiResponse.data.toString());
+                                            debugPrint('data ${apiResponse.data}');
+
+                                            if(responseData['code'] == "101")
+                                            {
+                                              prefs.remove('jwt_token');
+
+                                              Navigator.of(context,rootNavigator: true).push(
+                                                MaterialPageRoute(builder: (context) =>
+                                                const LoginPage()),).then((value){
+
+                                              });
+
+                                              if(responseData['message'] != '')
+                                              {
+                                                Fluttertoast.showToast(
+                                                    msg: responseData['message'],
+                                                    toastLength: Toast.LENGTH_SHORT,
+                                                    gravity: ToastGravity.BOTTOM,
+                                                    timeInSecForIosWeb: 1,
+                                                    backgroundColor: Colors.red,
+                                                    textColor: Colors.white,
+                                                    fontSize: 13.0
+                                                );
+                                              }
+
+                                            }
+                                            else
+                                            {
+                                              if(responseData['return'].toString() == "true")
+                                              {
+                                                point1 = false;
+                                                point1Complete = true;
+
+                                                reloadData();
+                                                dataPoint(1, true);
+                                              }
+
+                                              if(responseData['message'] != '')
+                                              {
+                                                Fluttertoast.showToast(
+                                                    msg: responseData['message'],
+                                                    toastLength: Toast.LENGTH_SHORT,
+                                                    gravity: ToastGravity.BOTTOM,
+                                                    timeInSecForIosWeb: 1,
+                                                    backgroundColor: Colors.red,
+                                                    textColor: Colors.white,
+                                                    fontSize: 13.0
+                                                );
+                                              }
+
+                                            }
+
+
+                                          }
+                                          else
+                                          {
+                                            Fluttertoast.showToast(
+                                                msg: (apiResponse.apiError).msg,
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                timeInSecForIosWeb: 1,
+                                                backgroundColor: Colors.red,
+                                                textColor: Colors.white,
+                                                fontSize: 13.0
+                                            );
+                                          }
+
+                                        });
+                                      }
+                                    },
+                                    style: TextButton.styleFrom(
+                                        foregroundColor: Colors.red,
+                                        elevation: 2,
+                                        backgroundColor: point1 ? const Color(0XFF98BF54) : const Color(0XFFC1C6C9)),
+                                    child: Text(
+                                      point1Complete ? '5,000걸음 30P 완료' : '5,000걸음 30P 적립',
+                                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                                    ),
+                                  )
                               ),
-                            ]
-                        )
-                      ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  //상품포인트
-                  GestureDetector(
-                    onTap: () {
-                      launchUrl(Uri.parse('tel: 1522-0365'));
-                    }, // Image tapped
-                    child: Image.asset(
-                      'assets/images/banner_point.png',
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
+                              const SizedBox(width: 5,),
+                              Expanded(
+                                  flex: 5,
+                                  child: TextButton(
+                                    onPressed: () {
+                                      if(point2 && point2Complete == false)
+                                      {
+                                        final parameters = {"jwt_token":jwtToken, "money":"70"};
+                                        JsonApi.postApi("rest/step_money", parameters).then((value) {
+                                          ApiResponse apiResponse = ApiResponse();
 
-                  // 적립내역
-                  Container(
-                    padding: const EdgeInsets.only(left: 0.0, top: 20.0, right: 0.0, bottom: 20.0),
-                    child: const Text("적립내역", textAlign: TextAlign.left,
-                      style: TextStyle(color: Color(0XFF292929), fontSize: 18, fontWeight: FontWeight.bold),),
-                  ),
-                  (!isLoading)
-                  ?
-                  Container(
-                    color: Colors.white,
-                    height: 100,
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                  :
-                  Container(
-                    height: 70,
-                    color: const Color(0xFFEEEEEE),
-                    child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 4,
-                        itemBuilder: (context, index) {
-                          Map<String, String> category = cateStep[index].cast<String, String>();
-                          return GestureDetector(
-                              onTap: (){
-                                if(selected != category["id"])
-                                {
-                                  setState(() {
-                                    selected = category["id"] ?? '';
-                                    debugPrint('카테고리 클릭 : $selected');
-                                  });
+                                          apiResponse = value;
 
-                                  dataPoint(1, true).then((value) {
-                                    setState(() {
+                                          if((apiResponse.apiError).error == "9") {
 
-                                    });
-                                  });
-                                }
-                              },
-                              child: Card(
-                                  semanticContainer: true,
-                                  clipBehavior: Clip.antiAliasWithSaveLayer,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  color:
-                                  (category["id"] == selected) ? const Color(0xFFA586BC) :
-                                  const Color(0xFFCCCCCC),
-                                  elevation: 0.0, // 그림자 효과
-                                  margin: const EdgeInsets.only(top: 20, bottom: 20, left: 15),
-                                  child: Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left:10.0, right: 10.0, top: 0.0, bottom: 0.0),
-                                      child: Text(category["name"] ?? '',
-                                          style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 12,)),
+                                            final responseData = json.decode(apiResponse.data.toString());
+                                            debugPrint('data ${apiResponse.data}');
+
+                                            if(responseData['code'] == "101")
+                                            {
+                                              prefs.remove('jwt_token');
+
+                                              Navigator.of(context,rootNavigator: true).push(
+                                                MaterialPageRoute(builder: (context) =>
+                                                const LoginPage()),).then((value){
+
+                                              });
+
+                                              if(responseData['message'] != '')
+                                              {
+                                                Fluttertoast.showToast(
+                                                    msg: responseData['message'],
+                                                    toastLength: Toast.LENGTH_SHORT,
+                                                    gravity: ToastGravity.BOTTOM,
+                                                    timeInSecForIosWeb: 1,
+                                                    backgroundColor: Colors.red,
+                                                    textColor: Colors.white,
+                                                    fontSize: 13.0
+                                                );
+                                              }
+
+                                            }
+                                            else
+                                            {
+                                              if(responseData['return'])
+                                              {
+                                                reloadData();
+                                                dataPoint(1, true);
+
+                                                setState(() {
+                                                  point2 = false;
+                                                  point2Complete = true;
+                                                });
+                                              }
+
+                                              if(responseData['message'] != '')
+                                              {
+                                                Fluttertoast.showToast(
+                                                    msg: responseData['message'],
+                                                    toastLength: Toast.LENGTH_SHORT,
+                                                    gravity: ToastGravity.BOTTOM,
+                                                    timeInSecForIosWeb: 1,
+                                                    backgroundColor: Colors.red,
+                                                    textColor: Colors.white,
+                                                    fontSize: 13.0
+                                                );
+                                              }
+                                            }
+                                          }
+                                          else
+                                          {
+                                            Fluttertoast.showToast(
+                                                msg: (apiResponse.apiError).msg,
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                timeInSecForIosWeb: 1,
+                                                backgroundColor: Colors.red,
+                                                textColor: Colors.white,
+                                                fontSize: 13.0
+                                            );
+                                          }
+
+                                        });
+                                      }
+
+
+                                    },
+                                    style: TextButton.styleFrom(
+                                        foregroundColor: Colors.red,
+                                        elevation: 2,
+                                        backgroundColor: point2 ? const Color(0XFF98BF54) : const Color(0XFFC1C6C9)),
+                                    child: Text(
+                                      point2Complete ? '10,000걸음 70P 완료' : '10,000걸음 70P 적립',
+                                      style: const TextStyle(color: Colors.white, fontSize: 14),
                                     ),
                                   )
                               )
-                          );
-                        }
-                    )
+                            ]
+                        ),
+                      ]
                   ),
+                  const SizedBox(height: 5,),
+                  const Divider(
+                    thickness: 1,
+                    color: Color(0x80CBCACA),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text("나의 보유 포인트 ", textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0XFF626262), fontFamily: 'SCDream', fontSize: 14, ),),
+                      Text((int.parse(step_money) + int.parse(active_money)).toString(), textAlign: TextAlign.center,
+                        style: const TextStyle(color: Color(0XFF60A7D3), fontFamily: 'SCDream', fontSize: 22, fontWeight: FontWeight.bold,),),
+                      const Text(" P", textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0XFF626262), fontFamily: 'SCDream', fontSize: 14, ),),
+                    ],
+                  ),
+                  const SizedBox(height: 10,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text("걸음 포인트 ", textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0XFF626262), fontFamily: 'SCDream', fontSize: 14, ),),
+                      Text(step_money, textAlign: TextAlign.center,
+                        style: const TextStyle(color: Color(0XFF60A7D3), fontFamily: 'SCDream', fontSize: 22, fontWeight: FontWeight.bold,),),
+                      const Text("P / 활동 포인트", textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0XFF626262), fontFamily: 'SCDream', fontSize: 14, ),),
+                      Text(active_money, textAlign: TextAlign.center,
+                        style: const TextStyle(color: Color(0XFF60A7D3), fontFamily: 'SCDream', fontSize: 22, fontWeight: FontWeight.bold,),),
+                      const Text("P", textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0XFF626262), fontFamily: 'SCDream', fontSize: 14, ),),
+                    ],
+                  ),
+                  const SizedBox(height: 5,),
+                  const Divider(
+                    thickness: 1,
+                    color: Color(0x80CBCACA),
+                  ),
+                  const SizedBox(height: 10,),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () {
+                        launchUrl(Uri.parse('tel: 1522-0365'));
+                      }, // Image tapped
+                      child: const Text("포인트 교환하기  >", textAlign: TextAlign.right,
+                        style: TextStyle(color: Color(0XFF5F5F5F), fontSize: 13, fontWeight: FontWeight.bold),),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    color: const Color(0XFFF4F4F4),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 10,),
+                          const Text("적립내역", style: TextStyle(fontFamily: 'SCDream', color: Color(0xFF626262), fontSize: 15, fontWeight: FontWeight.bold)),
+                          (!isLoading)
+                              ?
+                          Container(
+                            color: Colors.white,
+                            height: 100,
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                              :
+                          Container(
+                              height: 70,
+                              child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: 4,
+                                  itemBuilder: (context, index) {
+                                    Map<String, String> category = cateStep[index].cast<String, String>();
+                                    return GestureDetector(
+                                        onTap: (){
+                                          if(selected != category["id"])
+                                          {
+                                            setState(() {
+                                              selected = category["id"] ?? '';
+                                              debugPrint('카테고리 클릭 : $selected');
+                                            });
+
+                                            dataPoint(1, true).then((value) {
+                                              setState(() {
+
+                                              });
+                                            });
+                                          }
+                                        },
+                                        child: Card(
+                                            semanticContainer: true,
+                                            clipBehavior: Clip.antiAliasWithSaveLayer,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            color:
+                                            (category["id"] == selected) ? const Color(0xFF60A7D3) :
+                                            const Color(0xFFB4B4B4),
+                                            elevation: 0.0, // 그림자 효과
+                                            margin: const EdgeInsets.only(top: 20, bottom: 20, left: 15),
+                                            child: Center(
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(left:10.0, right: 10.0, top: 0.0, bottom: 0.0),
+                                                child: Text(category["name"] ?? '',
+                                                    style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 12,)),
+                                              ),
+                                            )
+                                        )
+                                    );
+                                  }
+                              )
+                          ),
+
+                          (PointListData.items.isEmpty)
+                              ?
+                          Container(
+                            color: const Color(0XFFFFFFFF),
+                            height: 100,
+                            child: const Center(
+                              child: Text("등록된 자료가 없습니다.",
+                                  style: TextStyle(color: Colors.black, height: 1, fontSize: 15, fontWeight: FontWeight.bold)),
+                            ),
+                          )
+                              :
+                          GridView.builder(
+                              physics: const ScrollPhysics(),
+                              scrollDirection: Axis.vertical,
+                              shrinkWrap: true,
+                              itemCount: PointListData.items.length,
+                              controller: scBoard,
+                              gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  childAspectRatio: aspectRatio
+                              ),
+                              itemBuilder: (context, index) {
+
+                                return Row(
+                                  // mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                        flex : 3,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(10),
+                                          // color: const Color(0xFFf4f4f4),
+                                          child: RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: PointListData.items[index].mo_content,
+                                                  style: const TextStyle(
+                                                    fontFamily: 'SCDream',
+                                                    color: Color(0xFF212529),
+                                                    fontSize: 11.0,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                    ),
+                                    Expanded(
+                                        flex : 2,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(10),
+                                          // color: const Color(0xFFf4f4f4),
+                                          child: RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: PointListData.items[index].mo_datetime.substring(0, 10),
+                                                  style: const TextStyle(
+                                                    fontFamily: 'SCDream',
+                                                    color: Color(0xFF999999),
+                                                    fontSize: 12.0,
+                                                    // fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                    ),
+                                    Expanded(
+                                        flex : 1,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(10),
+                                          // color: const Color(0xFFf4f4f4),
+                                          child: RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: (int.parse(PointListData.items[index].mo_money) > 0)
+                                                      ? '+ ${PointListData.items[index].mo_money}'
+                                                      : PointListData.items[index].mo_money,
+                                                  style: TextStyle(
+                                                    fontFamily: 'SCDream',
+                                                    color: (int.parse(PointListData.items[index].mo_money) > 0)
+                                                        ? const Color(0xFF60A7D3)
+                                                        : Colors.grey,
+                                                    fontSize: 12.0,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                    ),
+
+                                  ],
+                                );
+                              }
+                            // scrollDirection: Axis.horizontal,
+
+
+                          ),
+                        ]
+                    ),
+                  ),
+                  //상품포인트
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     launchUrl(Uri.parse('tel: 1522-0365'));
+                  //   }, // Image tapped
+                  //   child: Image.asset(
+                  //     'assets/images/banner_point.png',
+                  //   ),
+                  // ),
+                  // const SizedBox(
+                  //   height: 10,
+                  // ),
+
+                  // // 적립내역
+                  // Container(
+                  //   padding: const EdgeInsets.only(left: 0.0, top: 20.0, right: 0.0, bottom: 20.0),
+                  //   child: const Text("적립내역", textAlign: TextAlign.left,
+                  //     style: TextStyle(color: Color(0XFF292929), fontSize: 18, fontWeight: FontWeight.bold),),
+                  // ),
 
                   // // 리스트 출력
-                  (PointListData.items.isEmpty)
-                  ?
-                  Container(
-                    color: const Color(0XFFFFFFFF),
-                    height: 100,
-                    child: const Center(
-                      child: Text("등록된 자료가 없습니다.",
-                          style: TextStyle(color: Colors.black, height: 1, fontSize: 15, fontWeight: FontWeight.bold)),
-                    ),
-                  )
-                  :
-                  GridView.builder(
-                      physics: const ScrollPhysics(),
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      itemCount: PointListData.items.length,
-                      controller: scBoard,
-                      gridDelegate:
-                      SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
-                          childAspectRatio: aspectRatio
-                      ),
-                      itemBuilder: (context, index) {
-
-                        return Row(
-                          // mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                                flex : 3,
-                                child: Container(
-                                  padding: const EdgeInsets.all(10),
-                                  color: const Color(0xFFf4f4f4),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: PointListData.items[index].mo_content,
-                                          style: const TextStyle(
-                                            color: Color(0xFF212529),
-                                            fontSize: 12.0,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                            ),
-                            Expanded(
-                                flex : 2,
-                                child: Container(
-                                  padding: const EdgeInsets.all(10),
-                                  // color: const Color(0xFFf4f4f4),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: PointListData.items[index].mo_datetime.substring(0, 10),
-                                          style: const TextStyle(
-                                            color: Color(0xFF999999),
-                                            fontSize: 12.0,
-                                            // fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                            ),
-                            Expanded(
-                                flex : 1,
-                                child: Container(
-                                  padding: const EdgeInsets.all(10),
-                                  // color: const Color(0xFFf4f4f4),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: (int.parse(PointListData.items[index].mo_money) > 0)
-                                              ? '+ ${PointListData.items[index].mo_money}'
-                                              : PointListData.items[index].mo_money,
-                                          style: TextStyle(
-                                            color: (int.parse(PointListData.items[index].mo_money) > 0)
-                                                ? Colors.red
-                                                : Colors.grey,
-                                            fontSize: 12.0,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                            ),
-
-                          ],
-                        );
-                      }
-                    // scrollDirection: Axis.horizontal,
-
-
-                  ),
-
+                  /*
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -886,6 +776,8 @@ class WalkState extends State<Walk> {
                       const SizedBox(height: 10,),
                     ],
                   ),
+                  */
+                  const SizedBox(height: 40,)
               ]
             )
           )

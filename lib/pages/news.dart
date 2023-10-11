@@ -231,7 +231,7 @@ class NewsPageState extends State<NewsPage> {
     var crossAxisSpacing = 8;
     var width = (screenWidth - ((crossAxisCount - 1) * crossAxisSpacing)) /
         crossAxisCount;
-    var cellHeight = 100;
+    var cellHeight = 145;
     var aspectRatio = width / cellHeight;
     var mainHeight = screenHeight - 200;
 
@@ -249,7 +249,7 @@ class NewsPageState extends State<NewsPage> {
               Container(
                 height: 70,
                 padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                color: const Color(0xFFEEEEEE),
+                color: const Color(0xFFFFFFFF),
                 child :CustomScrollView(
                   controller: scCate,
                   slivers: <Widget>[
@@ -280,16 +280,20 @@ class NewsPageState extends State<NewsPage> {
                                       .antiAliasWithSaveLayer,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius
-                                        .circular(10),
+                                        .circular(20),
+                                    side: BorderSide(color: (category.id == ca_name)
+                                        ? const Color(0xFF90BC63)
+                                        :
+                                    const Color(0xFF8E8E8E) ),
                                   ),
                                   color:
                                   (category.id == "9")
                                       ? Colors.orange
                                       :
                                   (category.id == ca_name)
-                                      ? const Color(0xFFA586BC)
+                                      ? const Color(0xFF90BC63)
                                       :
-                                  const Color(0xFFCCCCCC),
+                                  const Color(0xFFFFFFFF),
                                   elevation: 0.0,
                                   // 그림자 효과
                                   margin: const EdgeInsets.only(
@@ -307,9 +311,12 @@ class NewsPageState extends State<NewsPage> {
                                             bottom: 6.0),
                                         child: Text(
                                             category.name,
-                                            style: const TextStyle(
-                                                color: Color(
-                                                    0xFFFFFFFF), fontSize: 12)),
+                                            style: TextStyle(
+                                                color: (category.id == ca_name)
+                                                    ? const Color(0xFFFFFFFF)
+                                                    :
+                                                  const Color(0xFF8E8E8E),
+                                                 fontSize: 12)),
                                       ),
                                     ),
                                   ),
@@ -414,104 +421,141 @@ class NewsPageState extends State<NewsPage> {
                                                         });
                                                 });
                                             },
-                                            child: Row(
-                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                // TODO: Change innermost Column (123)
-                                                children: <Widget>[
-                                                  SizedBox (
-                                                      width: NewsBoardData.items[index].thum != "" ? screenWidth - 160 : screenWidth - 20,
-                                                      child: Column(
-                                                          children: <Widget>[
-                                                            Align(alignment: Alignment.topLeft,
-                                                              child: RichText(
-                                                                overflow: TextOverflow.ellipsis,
-                                                                maxLines: 1,
-                                                                text: TextSpan(
-                                                                  text: NewsBoardData.items[index].wr_subject,
-                                                                  style: const TextStyle(
-                                                                      color: Colors.black,
-                                                                      height: 1.4,
-                                                                      fontSize: 16.0,)),
-                                                              )
-                                                            ),
-                                                            const SizedBox(height: 5,),
-                                                            Align(alignment: Alignment.topLeft,
-                                                                child: Text(NewsBoardData.items[index].wr_date, style: const TextStyle(color: Color(0xFF8E8E8E), fontSize: 13),)
-                                                            ),
-                                                            const SizedBox(height: 5,),
-                                                            Align(alignment: Alignment.topLeft,
-                                                                child: RichText(
-                                                                  text: TextSpan(
-                                                                    children: [
-                                                                      const WidgetSpan(
-                                                                        child: Icon(Icons.favorite, size: 14, color: Color(0xFF8E8E8E),),
-                                                                      ),
-                                                                      const TextSpan(
-                                                                        text: "  ",
-                                                                        style: TextStyle(
-                                                                          color: Color(0xFF8CC152),
-                                                                          fontSize: 14.0,
-                                                                          fontWeight: FontWeight.bold,
-                                                                        ),
-                                                                      ),
-                                                                      TextSpan(
-                                                                        text: NewsBoardData.items[index].wr_like.toString(),
-                                                                        style: const TextStyle(
-                                                                          color: Color(0xFF8CC152),
-                                                                          fontSize: 12.0,
-                                                                          fontWeight: FontWeight.bold,
-                                                                        ),
-                                                                      ),
-                                                                      const TextSpan(
-                                                                        text: "    ",
-                                                                        style: TextStyle(
-                                                                          color: Color(0xFF8CC152),
-                                                                          fontSize: 14.0,
-                                                                          fontWeight: FontWeight.bold,
-                                                                        ),
-                                                                      ),
-                                                                      const WidgetSpan(
-                                                                        child: Icon(Icons.comment, size: 14, color: Color(0xFF8E8E8E)),
-                                                                      ),
-                                                                      const TextSpan(
-                                                                        text: "  ",
-                                                                        style: TextStyle(
-                                                                          color: Color(0xFF8CC152),
-                                                                          fontSize: 12.0,
-                                                                          fontWeight: FontWeight.bold,
-                                                                        ),
-                                                                      ),
-                                                                      TextSpan(
-                                                                        text: NewsBoardData.items[index].wr_comment.toString(),
-                                                                        style: const TextStyle(
-                                                                          color: Color(0xFF8CC152),
-                                                                          fontSize: 12.0,
-                                                                          fontWeight: FontWeight.bold,
-                                                                        ),
-                                                                      ),
+                                            child: Stack(
+                                                children: [
+                                                  if(NewsBoardData.items[index].thum != "")
+                                                    Positioned(
+                                                        top: 0,
+                                                        right: -20,
+                                                        child: Container(
+                                                            width: 120,
+                                                            child:Image.network(NewsBoardData.items[index].thum, fit:BoxFit.fitHeight, width: screenWidth)
+                                                        )
+                                                    ),
 
-                                                                    ],
-                                                                  ),
-                                                                )
-                                                            ),
-                                                          ]
+                                                  Positioned(
+                                                      bottom: 5,
+                                                      right: 0,
+                                                      child: RichText(
+                                                          text: TextSpan(
+                                                            children: [
+                                                              const WidgetSpan(
+                                                                child: Icon(Icons.favorite, size: 14, color: Color(0xFFA5A5A5),),
+                                                              ),
+                                                              const TextSpan(
+                                                                text: "  ",
+                                                                style: TextStyle(
+                                                                  color: Color(0xFF8CC152),
+                                                                  fontSize: 14.0,
+                                                                  fontWeight: FontWeight.bold,
+                                                                ),
+                                                              ),
+                                                              TextSpan(
+                                                                text: NewsBoardData.items[index].wr_like.toString(),
+                                                                style: const TextStyle(
+                                                                  color: Color(0xFF8CC152),
+                                                                  fontSize: 12.0,
+                                                                  fontWeight: FontWeight.bold,
+                                                                ),
+                                                              ),
+                                                              const TextSpan(
+                                                                text: "    ",
+                                                                style: TextStyle(
+                                                                  color: Color(0xFF8CC152),
+                                                                  fontSize: 14.0,
+                                                                  fontWeight: FontWeight.bold,
+                                                                ),
+                                                              ),
+                                                              const WidgetSpan(
+                                                                child: Icon(Icons.comment, size: 14, color: Color(0xFFA5A5A5),),
+                                                              ),
+                                                              const TextSpan(
+                                                                text: "  ",
+                                                                style: TextStyle(
+                                                                  color: Color(0xFF8CC152),
+                                                                  fontSize: 12.0,
+                                                                  fontWeight: FontWeight.bold,
+                                                                ),
+                                                              ),
+                                                              TextSpan(
+                                                                text: NewsBoardData.items[index].wr_comment.toString(),
+                                                                style: const TextStyle(
+                                                                  color: Color(0xFF8CC152),
+                                                                  fontSize: 12.0,
+                                                                  fontWeight: FontWeight.bold,
+                                                                ),
+                                                              ),
+
+                                                            ],
+                                                          )
                                                       )
                                                   ),
-                                                  if(NewsBoardData.items[index].thum != "")
-                                                    Flexible(
-                                                        child:
-                                                        Align(alignment: Alignment.topRight,
-                                                            child: Container (
-                                                                width: 100,
-                                                                padding: const EdgeInsets.only(left:10.0),
-                                                                child:Image.network(NewsBoardData.items[index].thum, fit:BoxFit.fitHeight, width: screenWidth))
-                                                        ))
-
+                                                  Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Align(alignment: Alignment.topLeft,
+                                                            child: Container(
+                                                                width: 70,
+                                                                alignment: Alignment.topLeft,
+                                                                padding: const EdgeInsets.fromLTRB(2, 6, 2, 6),
+                                                                decoration: const BoxDecoration(
+                                                                    color: Color(0xFFE1E1E1),
+                                                                    borderRadius: BorderRadius.all(Radius.circular(10.0))
+                                                                ),
+                                                                child: Center(child: Text(NewsBoardData.items[index].ca_name_text, style: const TextStyle(
+                                                                  color: Color(0xFF818181),
+                                                                  fontFamily: 'SCDream',
+                                                                  fontSize: 11.0,
+                                                                  fontWeight: FontWeight.bold,
+                                                                )),
+                                                                )
+                                                            )
+                                                        ),
+                                                      ]
+                                                  ),
+                                                  Row(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: <Widget>[
+                                                        Container (
+                                                            padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+                                                            width: NewsBoardData.items[index].thum != "" ? screenWidth - 140 : screenWidth - 60,
+                                                            child: Column(
+                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                children: <Widget>[
+                                                                  RichText(
+                                                                    overflow: TextOverflow.ellipsis,
+                                                                    maxLines: 2,
+                                                                    text: TextSpan(
+                                                                        text: NewsBoardData.items[index].wr_content,
+                                                                        style: const TextStyle(
+                                                                          color: Colors.black,
+                                                                          fontFamily: 'SCDream',
+                                                                          fontWeight: FontWeight.bold,
+                                                                          height: 1.8,
+                                                                          fontSize: 14.0,)),
+                                                                  ),
+                                                                  const SizedBox(height: 15,),
+                                                                  Align(alignment: Alignment.topLeft,
+                                                                      child: Text('${NewsBoardData.items[index].wr_area} · ${NewsBoardData.items[index].wr_date} · 조회${NewsBoardData.items[index].wr_hit.toString()}회',
+                                                                          style:const TextStyle(
+                                                                              fontWeight: FontWeight.bold,
+                                                                              color: Color(0xFFA5A5A5),
+                                                                              fontFamily: 'SCDream',
+                                                                              fontSize: 11.0)
+                                                                      )
+                                                                  ),
+                                                                  const SizedBox(height: 5,),
+                                                                ]
+                                                            )
+                                                        ),
+                                                      ]
+                                                  ),
                                                 ]
                                             )
                                         )
                                     )
                                   ]
+
                               )
                           );
                         }

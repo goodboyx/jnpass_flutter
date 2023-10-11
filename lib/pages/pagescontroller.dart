@@ -5,7 +5,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:jnpass/pages/sosform.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:uuid/uuid.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:get_it/get_it.dart';
@@ -13,7 +12,6 @@ import 'package:jnpass/pages/home.dart';
 import 'package:jnpass/pages/news.dart';
 import 'package:jnpass/pages/profile_page.dart';
 import 'package:jnpass/pages/shareview.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import 'notice_page.dart';
 
@@ -40,9 +38,6 @@ class _PagesControllerState extends State<PagesController> {
   late String bo_table;
   late String appToken;
   late bool typeState = false;
-  Uuid uuid = const Uuid();
-  late String uuid_v4 = uuid.v4().toString();
-  late String mb_app_ver = '';
 
   PageController pageController = PageController(
     initialPage: 0,
@@ -69,35 +64,9 @@ class _PagesControllerState extends State<PagesController> {
   void initState() {
     super.initState();
 
-    /*
-    final provider = getIt.get<MemberState>();
-
-    provider.addListener(() {
-      debugPrint('provider.gr_id ${provider.gr_id}');
-
-      if((provider.gr_id == 'admin' || provider.gr_id == 'basic' || provider.gr_id == 'gr01') && provider.mb_auth == 'Y')
-      {
-        if(mounted)
-        {
-          setState(() {
-            typeState = true;
-          });
-        }
-      }
-
-    });
-    */
     SharedPreferences.getInstance().then((value) {
-
       prefs = value;
       mbId = prefs.getString('mb_id') ?? '';
-
-      debugPrint('mb_id : $mbId');
-
-    });
-
-    PackageInfo.fromPlatform().then((value){
-      mb_app_ver = value.version;
     });
 
     bottomTapped(0);

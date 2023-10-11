@@ -186,7 +186,13 @@ class NewsViewState extends State<NewsView> {
                 title: const Text("동네소식", textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.black, fontSize: 15),),
                 backgroundColor: Colors.white,
-                // elevation: 0.0,
+                shape: const Border(
+                  bottom: BorderSide(
+                    color: Colors.grey,
+                    width: 1,
+                  ),
+                ),
+                elevation: 0.0,
                 leading: IconButton(
                   icon: const Icon(Icons.chevron_left),
                   onPressed: () =>
@@ -194,6 +200,29 @@ class NewsViewState extends State<NewsView> {
                   color: Colors.black,
                 ),
                 actions: <Widget>[
+                  if(jwtToken.isNotEmpty && mbData['mb_id'] != boardData['mb_id'])
+                    IconButton(icon: const FaIcon(FontAwesomeIcons.triangleExclamation, size: 16.0),
+                      color: Colors.black,
+                      onPressed: (){
+                        Navigator.of(context,rootNavigator: true).push(
+                          MaterialPageRoute(builder: (context) =>
+                              Singo(bo_table: 'news', wr_id: widget.wrId)),).then((value){
+                          debugPrint('value : $value');
+                          if(value == "singo")
+                          {
+                            Navigator.pop(context, 'reload');
+                          }
+                        });
+                      },
+                    ),
+
+                  IconButton(icon: const FaIcon(FontAwesomeIcons.shareNodes, size: 16.0),
+                    color: Colors.black,
+                    onPressed: (){
+                      JsonApi.shareFun(context, url, "동네소식");
+                    },
+                  ),
+
                   // 좋아요 클릭
                   IconButton(icon: FaIcon((isLike == false) ? FontAwesomeIcons.heart : FontAwesomeIcons.solidHeart, size: 16.0),
                     color: (isLike == false) ? Colors.black : Colors.red,
@@ -259,38 +288,6 @@ class NewsViewState extends State<NewsView> {
                       }
 
                     },),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10, left: 0, right: 10, bottom: 10),
-                    child: MaterialButton(
-                      minWidth:50,
-                      color: const Color(0xFF98BF54),
-                      onPressed: () {
-                        JsonApi.shareFun(context, url, "동네소식");
-                      },
-                      child: const Text('공유', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16)),
-                    ),
-                  ),
-
-                  if(jwtToken.isNotEmpty && mbData['mb_id'] != boardData['mb_id'])
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10, left: 0, right: 10, bottom: 10),
-                      child: MaterialButton(
-                        minWidth:50,
-                        color: const Color(0xFFE97031),
-                        onPressed: () {
-                          Navigator.of(context,rootNavigator: true).push(
-                            MaterialPageRoute(builder: (context) =>
-                                Singo(bo_table: 'news', wr_id: widget.wrId)),).then((value){
-                            debugPrint('value : $value');
-                            if(value == "singo")
-                            {
-                              Navigator.pop(context, 'reload');
-                            }
-                          });
-                        },
-                        child: const Text('신고', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16)),
-                      ),
-                    ),
 
                   if(jwtToken.isNotEmpty && mbData['mb_id'] == boardData['mb_id'])
                   // 자산의 글이라면 수정하기
@@ -401,6 +398,7 @@ class NewsViewState extends State<NewsView> {
                                                                   text: boardData['wr_name'],
                                                                   style: const TextStyle(
                                                                     color: Color(0XFF1f1f1f),
+                                                                    fontFamily: 'SCDream',
                                                                     fontSize: 13.0,
                                                                     fontWeight: FontWeight.bold,
                                                                   ),
@@ -409,6 +407,7 @@ class NewsViewState extends State<NewsView> {
                                                                   text: "\n${boardData['wr_area']}",
                                                                   style: const TextStyle(
                                                                     color: Color(0XFF727272),
+                                                                    fontFamily: 'SCDream',
                                                                     fontSize: 12.0,
                                                                     // fontWeight: FontWeight.bold,
                                                                   ),
@@ -450,6 +449,17 @@ class NewsViewState extends State<NewsView> {
                                             color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),),
 
                                     ),
+                                    (DonationBannerData.items.isNotEmpty)
+                                        ?
+                                    CarouselSlider(
+                                      options: CarouselOptions(height: 300),
+                                      items: DonationBannerData.items.toList().map((item) =>
+                                          Image.network(item.img_src, fit:BoxFit.fitHeight, width: 800))
+                                          .toList(),
+                                    )
+                                        :
+                                    Container(),
+                                    const SizedBox(height: 10,),
                                     Container(
                                       alignment: Alignment.topLeft,
                                       margin: const EdgeInsets.only(left: 20.0,
@@ -462,18 +472,33 @@ class NewsViewState extends State<NewsView> {
                                             color: Colors.black, fontSize: 16),),
 
                                     ),
-                                    (DonationBannerData.items.isNotEmpty)
-                                        ?
-                                    CarouselSlider(
-                                      options: CarouselOptions(height: 300),
-                                      items: DonationBannerData.items.toList().map((item) =>
-                                          Image.network(item.img_src, fit:BoxFit.fitHeight, width: 800))
-                                          .toList(),
-                                    )
-                                        :
-                                    Container(),
-                                    const SizedBox(height: 10,),
-
+                                    Container(
+                                      alignment: Alignment.topLeft,
+                                      margin: const EdgeInsets.only(left: 20.0,
+                                      bottom: 5.0,
+                                      top: 10.0,
+                                      right: 15.0),
+                                      child: const Divider(
+                                        color: Colors.grey,
+                                        height: 1.0,
+                                      ),
+                                    ),
+                                    Container(
+                                      alignment: Alignment.topLeft,
+                                      margin: const EdgeInsets.only(left: 20.0,
+                                          bottom: 5.0,
+                                          top: 10.0,
+                                          right: 15.0),
+                                      child: Row(
+                                        children: [
+                                          Text('댓글 ${commentCnt}', style: const TextStyle(
+                                            color: Color(0xFF000000),
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                        ],
+                                      ),
+                                    ),
                                     (commentCnt > 0)
                                         ?
                                     SizedBox(height: 250,
@@ -765,9 +790,9 @@ class NewsViewState extends State<NewsView> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('경고'),
-          content: SingleChildScrollView(
+          content: const SingleChildScrollView(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('해당 글을 하시겠습니까?'),
                 // Text('Would you like to approve of this message?'),
               ],
@@ -956,174 +981,146 @@ class NewsViewState extends State<NewsView> {
       isMe = true;
     }
 
-    return Row(
-      mainAxisAlignment:
-      (isMe == false) ? MainAxisAlignment.start : MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        const SizedBox(width: 5,),
-
-        (message.mb_img != "")
-            ?
-        InkWell(
-            onTap: () async {
-              if(jwtToken.isNotEmpty && mbData['mb_id'] != boardData['mb_id'])
-              {
-                // 상대방 프로필 화면으로 이동
-                Navigator.of(context,rootNavigator: true).push(
-                  MaterialPageRoute(builder: (context) =>
-                      UserProfile(user_id:boardData['mb_id'])),).then((value) async {
-
-                  debugPrint('value : $value');
-                  if(value == "reload")
-                  {
-                    Navigator.pop(context, 'reload');
-                  }
-                });
-              }
-            },
-            child: Container(
-              width: 50.0,
-              height: 50.0,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(25.0),
-                child: FadeInImage(
-                  placeholder: const AssetImage("assets/images/profile.png"),
-                  image: NetworkImage(message.mb_img.toString()),
-                  imageErrorBuilder:
-                      (context, error, stackTrace) {
-                    return Image.asset(
-                        'assets/images/profile.png',
-                        fit: BoxFit.fitWidth);
-                  },
-                ),
-              ),
-            )
-        )
-            :
-        Column(
+    return Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            (isMe == true && message.state != "3")
-                ?
-            Padding(
-              padding: const EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 0),
-              child: MaterialButton(
-                minWidth:30,
-                height: 25,
-                color: kErrorColor,
-                onPressed: () {
-                  _showCommentDialog(message.id);
-                },
-                child: const Text('삭제', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 11)),
-              ),
-            )
-                :
-            const SizedBox(),
-
-            (isMe == false && message.state != "2")
-                ?
-            Padding(
-              padding: const EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 0),
-              child: MaterialButton(
-                minWidth:40,
-                height: 25,
-                color: const Color(0xFFE97031),
-                onPressed: () {
+            Container(
+              margin : EdgeInsets.only(left: (isMe == false) ? 10.0 : 60.0, bottom: 10, top: 20, right: 0.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InkWell(
+                  onTap: () async {
+                  if(jwtToken.isNotEmpty && mbData['mb_id'] != boardData['mb_id'])
+                  {
+                  // 상대방 프로필 화면으로 이동
                   Navigator.of(context,rootNavigator: true).push(
-                    MaterialPageRoute(builder: (context) =>
-                        SingoComment(bo_table: 'news', wr_id: widget.wrId, fs_id: message.id, fs_message: message.content,)),).then((value){
+                  MaterialPageRoute(builder: (context) =>
+                  SingoComment(bo_table: 'news', wr_id: widget.wrId, fs_id: message.id, fs_message: message.content,)),).then((value){
+                  if(value != null)
+                  {
+                  debugPrint('value : $value');
+                  try {
+                  var db = FirebaseFirestore.instance;
 
-                    if(value != null)
-                    {
-                      debugPrint('value : $value');
-                      try {
-                        var db = FirebaseFirestore.instance;
+                  db.collection("news")
+                      .doc(widget.wrId)
+                      .collection("messages").doc(value).update({
+                  "state": "2",
+                  "content": "신고 접수된 글입니다.",
+                  });
 
-                        db.collection("news")
-                            .doc(widget.wrId)
-                            .collection("messages").doc(value).update({
-                          "state": "2",
-                          "content": "신고 접수된 글입니다.",
-                        });
-
-                        setState(() {
-
-                        });
-
-                      } catch (e) {
-                        print(e);
-                      }
-
-                    }
+                  setState(() {
 
                   });
-                },
-                child: const Text('신고', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 11)),
-              ),
-            )
-                :
-            const SizedBox(),
 
-            Text(
-              message.sendDate.toDate().toLocal().toString().substring(5,16),
-              style: TextStyle(color: Colors.grey.shade400),
-            ),
-          ],
-        ),
-        Flexible(
-          child: Container(
-              margin: const EdgeInsets.only(left: 10, right: 10, top: 20),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: (isMe == false) ? Colors.indigo.shade100 : Colors.indigo.shade50,
-                borderRadius: (isMe == false)
-                    ? const BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                  bottomLeft: Radius.circular(30),
-                )
-                    : const BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
-                ),
-              ),
-              child: RichText(
-                text: TextSpan(text: message.content.toString(), style: const TextStyle(color: Colors.black38)),
-              )
-          ),
-        ),
-        (message.mb_img != "")
-            ?
-        Column(
-          children: [
-            (isMe == true && message.state != "3")
-                ?
-            Padding(
-              padding: const EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 0),
-              child: MaterialButton(
-                minWidth:30,
-                height: 25,
-                color: kErrorColor,
-                onPressed: () {
-                  _showCommentDialog(message.id);
-                },
-                child: const Text('삭제', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 11)),
+                  } catch (e) {
+                  print(e);
+                  }
+
+                  }
+                  });
+                  }
+                  },
+                  child: Container(
+                  width: 50.0,
+                  height: 50.0,
+                  child: ClipRRect(
+                  borderRadius: BorderRadius.circular(25.0),
+                  child: FadeInImage(
+                  placeholder: const AssetImage("assets/images/profile.png"),
+                  image: (message.mb_img != "") ? NetworkImage(message.mb_img.toString()) :  NetworkImage("assets/images/profile.png"),
+                  imageErrorBuilder:
+                  (context, error, stackTrace) {
+                  return Image.asset(
+                  'assets/images/profile.png',
+                  fit: BoxFit.fitWidth);
+                  },
+                  ),
+                  ),
+                  )
+                  ),
+                  const SizedBox(width: 10,),
+                  Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                  Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                  SizedBox(
+                  width: (isMe == false) ?  MediaQuery.of(context).size.width - 80 : MediaQuery.of(context).size.width - 130,
+                  child: Text(
+                  message.mb_nick.toString(),
+                  textAlign: TextAlign.left,
+                  style: const TextStyle(fontFamily: 'SCDream', fontWeight: FontWeight.bold, color: Color(0xFF000000), fontSize: 12),
+                  ),
+                  ),
+                  const SizedBox(height: 5.0),
+                  SizedBox(
+                  width: (isMe == false) ?  MediaQuery.of(context).size.width - 100 : MediaQuery.of(context).size.width - 130,
+                  child: Text(
+                  message.content.toString(),
+                  textAlign: TextAlign.left,
+                  style: const TextStyle(fontFamily: 'SCDream', color: Color(0xFF000000), fontSize: 12),
+                  ),
+                  ),
+                  const SizedBox(height: 5.0),
+                  SizedBox(
+                  width: (isMe == false) ?  MediaQuery.of(context).size.width - 100 : MediaQuery.of(context).size.width - 130,
+                  child: Text(
+                  message.sendDate.toDate().toLocal().toString().substring(2,10),
+                  textAlign: TextAlign.left,
+                  style: const TextStyle(fontFamily: 'SCDream', color: Color(0xFF000000), fontSize: 10),
+                  )
+                  ),
+                  const SizedBox(width: 5,),
+                  ]
+                  ),
+                  (isMe == false && message.state != "2")
+                  ?
+                  Positioned(
+                  top: 0,
+                  right: -10,
+                  child: IconButton(icon: const FaIcon(FontAwesomeIcons.triangleExclamation, size: 16.0),
+                  color: Colors.black,
+                  onPressed: (){
+                  Navigator.of(context,rootNavigator: true).push(
+                  MaterialPageRoute(builder: (context) =>
+                  SingoComment(bo_table: 'news', wr_id: widget.wrId, fs_id: message.id, fs_message: message.content,)),).then((value){
+                  if(value != null)
+                  {
+                  debugPrint('value : $value');
+                  try {
+                  var db = FirebaseFirestore.instance;
+
+                  db.collection("news")
+                      .doc(widget.wrId)
+                      .collection("messages").doc(value).update({
+                  "state": "2",
+                  "content": "신고 접수된 글입니다.",
+                  });
+
+                  setState(() {
+
+                  });
+
+                  } catch (e) {
+                  print(e);
+                  }
+                  }
+                  });
+                  }
+                  )
+                  )
+                      :
+                  const SizedBox(),
+                  ]
+                  )
+                ]
               ),
             )
-                :
-            const SizedBox(height: 0,),
-            Text(
-              message.sendDate.toDate().toLocal().toString().substring(5,16),
-              style: TextStyle(color: Colors.grey.shade400),
-            ),
-          ],
-        )
-            :
-        const SizedBox(),
-        const SizedBox(width: 5,),
-      ],
-    );
+          ]
+      );
   }
 
   Widget? floatingButtons() {
@@ -1193,7 +1190,10 @@ class NewsViewState extends State<NewsView> {
                   child: TextField(
                     controller: controller,
                     onSubmitted: (value) {
-                      _onPressedSendButton();
+                      if(controller.text.isNotEmpty)
+                      {
+                        _onPressedSendButton();
+                      }
                       // debugPrint('${controller.text} : $value');
                     },
                     decoration: InputDecoration(
@@ -1219,7 +1219,7 @@ class NewsViewState extends State<NewsView> {
                 ),
                 const SizedBox(width: 10,),
                 RawMaterialButton(
-                  onPressed: _onPressedSendButton, //전송버튼을 누를때 동작시킬 메소드
+                  onPressed: _onPressedSendButton, //전송버튼을 누를때 동대스작시킬 메소드
                   constraints: const BoxConstraints(
                       minWidth: 0,
                       minHeight: 0
@@ -1261,36 +1261,50 @@ class NewsViewState extends State<NewsView> {
 
       MessageModel messageModel = MessageModel(content: controller.text, sendDate: Timestamp.now(), mb_id: mbData['mb_id'], mb_nick: mbData['mb_nick'], mb_img: mb_img);
 
-      //Firestore 인스턴스 가져오기
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-      //원하는 collection 주소에 새로운 document를 Map의 형태로 추가하는 모습.
-      firestore.collection('news/${widget.wrId}/messages').add(messageModel.toMap()).then((value) {
-        debugPrint('valuevv : ${value.id}');
+      String temp = controller.text;
 
-        initCommment();
+      debugPrint('temp : $temp');
 
-        String temp = controller.text;
-        controller.text = '';
+      if(temp.isNotEmpty) {
+        //Firestore 인스턴스 가져오기
+        FirebaseFirestore firestore = FirebaseFirestore.instance;
+        //원하는 collection 주소에 새로운 document를 Map의 형태로 추가하는 모습.
+        firestore.collection('news/${widget.wrId}/messages').add(messageModel.toMap()).then((value) {
+          initCommment();
 
-        final parameters = {"jwt_token": jwtToken, "wr_content": temp, "wr_password": "1234", "wr_subject": value.id.toString()};
+          controller.text = '';
+          final parameters = {"jwt_token": jwtToken, "wr_content": temp, "wr_password": "1234", "wr_subject": value.id.toString()};
+          JsonApi.postApi("rest/comment/news/${widget.wrId}", parameters).then((value) {
+            ApiResponse apiResponse = ApiResponse();
+            apiResponse = value;
 
-        JsonApi.postApi("rest/comment/news/${widget.wrId}", parameters).then((value) {
-          ApiResponse apiResponse = ApiResponse();
-          apiResponse = value;
+            if((apiResponse.apiError).error == "9") {
 
-          if((apiResponse.apiError).error == "9") {
+              final responseData = json.decode(apiResponse.data.toString());
 
-            final responseData = json.decode(apiResponse.data.toString());
+              if(kDebug)
+              {
+                debugPrint('data ${apiResponse.data}');
+              }
 
-            if(kDebug)
-            {
-              debugPrint('data ${apiResponse.data}');
+              if(responseData['message'] != '')
+              {
+                Fluttertoast.showToast(
+                    msg: responseData['message'],
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 13.0
+                );
+              }
+
             }
-
-            if(responseData['message'] != '')
+            else
             {
               Fluttertoast.showToast(
-                  msg: responseData['message'],
+                  msg: (apiResponse.apiError).msg,
                   toastLength: Toast.LENGTH_SHORT,
                   gravity: ToastGravity.BOTTOM,
                   timeInSecForIosWeb: 1,
@@ -1300,23 +1314,11 @@ class NewsViewState extends State<NewsView> {
               );
             }
 
-          }
-          else
-          {
-            Fluttertoast.showToast(
-                msg: (apiResponse.apiError).msg,
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Colors.red,
-                textColor: Colors.white,
-                fontSize: 13.0
-            );
-          }
+          });
+        } );
 
-        });
+      }
 
-      } );
 
       FocusScope.of(context).requestFocus(FocusNode());
 

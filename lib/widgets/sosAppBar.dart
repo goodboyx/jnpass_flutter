@@ -1,8 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:jnpass/pages/location.dart';
-import 'package:jnpass/provider/locationProvider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../common.dart';
 import '../constants.dart';
@@ -76,9 +74,6 @@ class SosAppBarState extends State<SosAppBar> {
         prefs.setString('me_loc', value);
         debugPrint('지역설정 : $value');
         meLoc = value;
-
-        // GetIt.I.get<LocationProvider>().setLocation(meLoc);
-
         notiEvent.notify(meLoc);
       }
 
@@ -90,31 +85,53 @@ class SosAppBarState extends State<SosAppBar> {
     return AppBar(
       centerTitle: true,
       title: const Text("우리동네 SOS", textAlign: TextAlign.center,
-        style: TextStyle(color: Colors.black, fontSize: 15),),
+        style: TextStyle(fontFamily: 'SCDream', color: Colors.black, fontSize: 15),),
       backgroundColor: Colors.white,
-      // elevation: 0.0,
-      leadingWidth:   95,
+      shape: const Border(
+        bottom: BorderSide(
+          color: Colors.grey,
+          width: 1,
+        ),
+      ),
+      elevation: 0.0,
+      leadingWidth:   110,
       leading: InkWell(
         onTap: () async {
           getLocation();
         },
-        child: Container(
-          width: 90.0,
-          padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-          margin: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-          child: Row(
+        child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(location,
-                  style: const TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold)),
-              const Icon(Icons.keyboard_arrow_down_sharp, color: Colors.black),
+              Padding(
+                padding: const EdgeInsets.only(left: 4.0),
+                child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                  ),
+                  side: const BorderSide(width: 2, color:Color(0xffF7F7F7)),
+                  backgroundColor:const Color(0xffF7F7F7),
+                ),
+                onPressed: () {
+                  getLocation();
+                },
+
+                child:  Row(
+                    children: <Widget>[
+                      // const Icon(Icons.location_on_outlined, color: Colors.black),
+                      Text(location,
+                          style: const TextStyle(fontFamily: 'SCDream', color: Colors.black, fontSize: 12)),
+                      const Icon(Icons.keyboard_arrow_down_sharp, color: Colors.black),
+                    ]
+                ),
+              )
+              )
             ]
-          )
         )
       ),
       actions: <Widget>[
         Padding(
-          padding: const EdgeInsets.only(right: 10.0),
+          padding: const EdgeInsets.only(right: 5.0),
           child: Row(
             children: <Widget>[
               OutlinedButton(
@@ -122,7 +139,8 @@ class SosAppBarState extends State<SosAppBar> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18.0),
                   ),
-                  side: const BorderSide(width: 2, color:Color(0xffDDDDDD)),
+                  side: const BorderSide(width: 2, color:Color(0xffF7F7F7)),
+                  backgroundColor:const Color(0xffF7F7F7),
                 ),
                 onPressed: () {
                   if(jwtToken == "")
@@ -142,7 +160,7 @@ class SosAppBarState extends State<SosAppBar> {
 
                   // Navigator.pushNamed(context, '/notice');
                   },
-                child: const Text('상담내역',style: TextStyle(color: kPrimaryColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                child: const Text('상담내역',style: TextStyle(fontFamily: 'SCDream', color: kPrimaryColor, fontSize: 13, )),
               )
             ],
           ),

@@ -20,6 +20,7 @@ class Location extends StatefulWidget {
 class LocationState extends State<Location> {
   late SharedPreferences prefs;
   String jwtToken = '';
+  String loc = '';
 
   @override
   void initState() {
@@ -28,6 +29,13 @@ class LocationState extends State<Location> {
       prefs = value;
       jwtToken = prefs.getString('jwt_token') ?? "";
     });
+
+    areaPositon = areaList.indexWhere((element) => element["id"] == widget.meLoc);
+    loc = areaList[areaPositon]['val'];
+    setState(() {
+
+    });
+    debugPrint("areaPositon : $areaPositon");
 
     super.initState();
   }
@@ -41,14 +49,24 @@ class LocationState extends State<Location> {
         appBar: AppBar(
             centerTitle: true,
             title: const Text("지역설정", textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.black, fontSize: 15),),
+              style: TextStyle(fontFamily: 'SCDream', color: Colors.black, fontSize: 15),),
             backgroundColor: Colors.white,
-            // elevation: 0.0,
+            elevation: 0.0,
+            shape: const Border(
+              bottom: BorderSide(
+                color: Colors.grey,
+                width: 1,
+              ),
+            ),
             leading: Padding(
               padding: const EdgeInsets.only(top: 10, left: 10, right: 0, bottom: 10),
               child: MaterialButton(
                 minWidth:30,
-                color: kButtonColor,
+                color: const Color(0xff90BC63),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    side: const BorderSide(color: Color(0xff90BC63))
+                ),
                 onPressed: () {
                   meLoc = widget.meLoc.toString();
 
@@ -195,12 +213,32 @@ class LocationState extends State<Location> {
                 children: [
                   Center(
                     child: Column(
-                        children: const [
-                          Padding(padding: EdgeInsets.only(top:20)),
-                          Text("지역은 하나만 선택가능합니다.",
+                        children: [
+                          const Padding(padding: EdgeInsets.only(top:20)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text("현재설정",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontFamily: 'SCDream',
+                                    fontSize: 20),
+                              ),
+                              Text(loc,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    fontFamily: 'SCDream',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 32),
+                              ),
+                            ]
+                          ),
+                          const SizedBox(height: 10),
+                          const Text("지역은 하나만 선택가능합니다.",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: Colors.black, fontSize: 15),
+                                fontFamily: 'SCDream',
+                                color: Color(0xFF898989), fontSize: 13),
                           ),
                           // Padding(padding: const EdgeInsets.only(bottom:20)),
                         ]
@@ -233,7 +271,7 @@ class LocationState extends State<Location> {
                                 borderRadius: BorderRadius.circular(5),
                               ),
                               elevation: 0,
-                              color: (widget.meLoc == areaList[index]['id']) ? kColor : const Color(0xFFFFFFFF),
+                              color: (widget.meLoc == areaList[index]['id']) ? const Color(0xFF60A7D3) : const Color(0xFFFFFFFF),
                               margin: const EdgeInsets.all(5),
                               // TODO: Adjust card heights (123)
                               child: Column(
@@ -248,9 +286,9 @@ class LocationState extends State<Location> {
                                           TextSpan(
                                             text: '${areaList[index]['val']}',
                                             style: TextStyle(
-                                              color: (widget.meLoc == areaList[index]['id']) ? const Color(0xFFFFFFFF) : const Color(0xFFC1C1C1),
+                                              color: (widget.meLoc == areaList[index]['id']) ? const Color(0xFFFFFFFF) : const Color(0xFF868686),
                                               fontSize: 16.0,
-                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'SCDream',
                                             ),
                                           ),
                                         ],

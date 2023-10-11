@@ -10,7 +10,7 @@ const APP_STORE_ID = 'net.jnpass';
 const IOS_APP_STORE_ID ='1594171424';
 
 const kPrimaryColor = Color(0xff292929);
-const kButtonColor  = Color(0xFFE97031);
+const kButtonColor  = Color(0xFF8CBA6D);
 const kColor = Color(0xFF98BF54);
 const kSecondaryColor = Color(0xFFFE9901);
 const kContentColorLightTheme = Color(0xFF1D1D35);

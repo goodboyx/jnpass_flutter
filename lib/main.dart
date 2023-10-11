@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -49,6 +50,7 @@ import 'pages/popover.dart';
 import 'pages/profile_page.dart';
 
 late SharedPreferences pref;
+late SharedPreferences prefs;
 late String? token;
 String appVer = '';
 int id = 0;
@@ -519,7 +521,7 @@ Future<void> initializeService() async {
 Future<void> step_count(value) async {
 
   debugPrint('---- step_count ----');
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs = await SharedPreferences.getInstance();
   final dateStr = DateFormat('yyyyMMdd').format(DateTime.now());
   int todayDayNo = int.parse(dateStr);
 
@@ -531,8 +533,9 @@ Future<void> step_count(value) async {
 
   // device reboot
   if (savedStepCount > value) {
-    prefs.setInt('savedStepCount', 0);
-    savedStepCount = 0;
+    savedStepCount = value;
+    pref.setInt('savedStepCount', value);
+    prefs.setInt('todaySteps', 0);
   }
 
   // next day
@@ -545,13 +548,6 @@ Future<void> step_count(value) async {
   }
 
   debugPrint('savedStepCount v $savedStepCount $value $todaySteps $lastValue');
-
-  if(savedStepCount == 0)
-  {
-    savedStepCount = value;
-    pref.setInt('savedStepCount', value);
-    prefs.setInt('todaySteps', 0);
-  }
 
   if (value > savedStepCount) {
 
@@ -635,27 +631,22 @@ void onStepCount(StepCount event) {
 
   // device reboot
   if (savedStepCount > value) {
-    pref.setInt('savedStepCount', 0);
-    savedStepCount = 0;
+    savedStepCount = value;
+    pref.setInt('savedStepCount', value);
+    todaySteps = 0;
+    pref.setInt('todaySteps', todaySteps);
   }
 
   // next day
   if (todayDayNo > lastDaySaved) {
-    pref.setInt('lastDaySaved', todayDayNo);
-    pref.setInt('savedStepCount', value);
-    pref.setInt('todaySteps', 0);
     savedStepCount = value;
     todaySteps = 0;
+    pref.setInt('lastDaySaved', todayDayNo);
+    pref.setInt('savedStepCount', value);
+    pref.setInt('todaySteps', todaySteps);
   }
 
   debugPrint('savedStepCount v $savedStepCount $value $todaySteps $lastValue');
-
-  if(savedStepCount == 0)
-  {
-    savedStepCount = value;
-    pref.setInt('savedStepCount', value);
-    pref.setInt('todaySteps', 0);
-  }
 
   if (value > savedStepCount) {
 
@@ -889,10 +880,24 @@ class MyApp extends StatelessWidget {
     // SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]); //세로
 
     return MaterialApp(
-      // title: 'Flutter Demo',
+      title: '우리동네 SOS',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalCupertinoLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ko', 'KR'),
+      ],
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        fontFamily: 'SCDream',
+        scaffoldBackgroundColor: Colors.white,
+        brightness: Brightness.light,
+        primarySwatch: Colors.purple,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        tabBarTheme: const TabBarTheme(
+        ),
       ),
       // initialRoute: (jwtToken != "") ? '/' : '/login',
       initialRoute: '/',
@@ -945,8 +950,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _handleNotification(Map<String, dynamic> message) {
-    debugPrint('message.link ${message['link'].toString()}');
-    debugPrint('message.click_action ${message['click_action'].toString()}');
+    debugPrint('message.link : ${message['link'].toString()}');
+    debugPrint('message.click_action : ${message['click_action'].toString()}');
 
     // ignore: unnecessary_null_comparison
     if (message != null) {
@@ -993,7 +998,7 @@ class _MyHomePageState extends State<MyHomePage> {
           {
             var parts = initialMessage.split('/');
 
-            // debugPrint('parts $parts');
+            debugPrint('parts $parts');
             if(parts![1].isNotEmpty)
             {
               SharedPreferences.getInstance().then((value) async {
@@ -1448,9 +1453,9 @@ class _MyHomePageState extends State<MyHomePage> {
       },
       children: [
         const HomePage(),
-        const NoticePage(),
-        const NoticePage(),
         const NewsPage(),
+        const NoticePage(),
+        const NoticePage(),
         (jwtToken.isEmpty) ? const LoginPage() : const ProfilePage()
       ]
   );
@@ -1471,8 +1476,8 @@ class _MyHomePageState extends State<MyHomePage> {
             //1f1f1f
             type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.white,          //Bar의 배경색
-            selectedItemColor: const Color(0xff51a5db),   //선택된 아이템의 색상
-            unselectedItemColor: const Color(0xff949494), //선택 안된 아이템의 색상
+            selectedItemColor: const Color(0xff90BC63),   //선택된 아이템의 색상
+            unselectedItemColor: const Color(0xff868686), //선택 안된 아이템의 색상
             selectedFontSize: 12,   //선택된 아이템의 폰트사이즈
             unselectedFontSize: 12, //선택 안된 아이템의 폰트사이즈
             currentIndex: selectedIndex, //현재 선택된 Index
@@ -1484,25 +1489,29 @@ class _MyHomePageState extends State<MyHomePage> {
               bottomTapped(index);
             },
             items: [
-              const BottomNavigationBarItem(
+              BottomNavigationBarItem(
                 label: '홈',
-                icon: Icon(Icons.home),
+                icon: Image.asset('assets/images/menu_home.png', width: 22, height: 25),
+                activeIcon: Image.asset('assets/images/menu_home_on.png', width: 22, height: 25)
               ),
-              const BottomNavigationBarItem(
-                label:'알림',
-                icon: Icon(FontAwesomeIcons.bell),
+              BottomNavigationBarItem(
+                label:'동네소식',
+                icon: Image.asset('assets/images/menu_news.png', width: 22, height: 25),
+                activeIcon: Image.asset('assets/images/menu_news_on.png', width: 22, height: 25)
               ),
               const BottomNavigationBarItem(
                 label: '상담하기',
                 icon: Icon(null),
               ),
-              const BottomNavigationBarItem(
-                label: '동네소식',
-                icon: Icon(Icons.library_books),
+              BottomNavigationBarItem(
+                label: '알림',
+                icon: Image.asset('assets/images/menu_notice.png', width: 22, height: 25),
+                activeIcon: Image.asset('assets/images/menu_notice_on.png', width: 22, height: 25)
               ),
               BottomNavigationBarItem(
                 label: (jwtToken.isEmpty) ? '로그인' : '나의활동' ,
-                icon: const Icon(Icons.manage_accounts),
+                icon: Image.asset('assets/images/menu_my.png', width: 22, height: 25),
+                activeIcon: Image.asset('assets/images/menu_my_on.png', width: 22, height: 25)
               ),
             ],
           ),

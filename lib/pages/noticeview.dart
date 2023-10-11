@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -111,19 +110,8 @@ class NoticeViewState extends State<NoticeView> {
 
   @override
   Widget build(BuildContext context) {
-    var screenWidth = MediaQuery.of(context).size.width;
-    var screenHeight = MediaQuery.of(context).size.height;
-    // var _crossAxisCount = ((_screenWidth - 32) / 160).floor(); //컬럼 갯수
-    // var crossAxisCount = 1; //컬럼 갯수
-    // var crossAxisSpacing = 8;
-    // var width = (screenWidth - ((crossAxisCount - 1) * crossAxisSpacing)) / crossAxisCount;
-    // var cellHeight = 160;
-    // var aspectRatio = width / cellHeight;
-    // var mainHeight = screenHeight - 200;
-
-    // if(Platform.isIOS){
-    //   mainHeight = screenHeight - 190;
-    // }
+    // var screenWidth = MediaQuery.of(context).size.width;
+    // var screenHeight = MediaQuery.of(context).size.height;
 
     if(!isLoading && mbData.isNotEmpty)
     {
@@ -144,7 +132,13 @@ class NoticeViewState extends State<NoticeView> {
                 title: const Text("공지사항", textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.black, fontSize: 15),),
                 backgroundColor: Colors.white,
-                // elevation: 0.0,
+                shape: const Border(
+                  bottom: BorderSide(
+                    color: Colors.grey,
+                    width: 1,
+                  ),
+                ),
+                elevation: 0.0,
                 leading: IconButton(
                   icon: const Icon(Icons.chevron_left),
                   onPressed: () =>
@@ -152,6 +146,12 @@ class NoticeViewState extends State<NoticeView> {
                   color: Colors.black,
                 ),
                 actions: <Widget>[
+                  IconButton(icon: const FaIcon(FontAwesomeIcons.shareNodes, size: 16.0),
+                      color: Colors.black,
+                      onPressed: (){
+                        JsonApi.shareFun(context, url, "공지사항");
+                      },
+                  ),
                   // 좋아요 클릭
                   IconButton(icon: FaIcon((isLike == false) ? FontAwesomeIcons.heart : FontAwesomeIcons.solidHeart, size: 16.0),
                     color: (isLike == false) ? Colors.black : Colors.red,
@@ -217,17 +217,6 @@ class NoticeViewState extends State<NoticeView> {
                       }
 
                     },),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10, left: 0, right: 10, bottom: 10),
-                    child: MaterialButton(
-                      minWidth:50,
-                      color: const Color(0xFF98BF54),
-                      onPressed: () {
-                        JsonApi.shareFun(context, url, "공지사항");
-                      },
-                      child: const Text('공유', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16)),
-                    ),
-                  ),
                 ]
             ),
             body: SafeArea(

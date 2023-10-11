@@ -75,10 +75,10 @@ class HomePageState extends State<HomePage> {
     var crossAxisSpacing = 8;
     var width = (screenWidth - ((crossAxisCount - 1) * crossAxisSpacing)) /
         crossAxisCount;
-    var cellHeight = 160;
+    var cellHeight = 180;
     var aspectRatio = width / cellHeight;
 
-    var mainHeight = screenHeight - 140;
+    var mainHeight = screenHeight - 150;
 
     if(Platform.isIOS){
       mainHeight = screenHeight - 190;
@@ -92,37 +92,14 @@ class HomePageState extends State<HomePage> {
             children: <Widget>[
               Container(
               height: mainHeight,
-              color: const Color(0xFFDDDDDD),
+              // color: const Color(0xFFDDDDDD),
                 child: Padding(
-                  padding: const EdgeInsets.only(top:15.0, left:15.0, right:15.0),
+                  padding: const EdgeInsets.only(top:30.0, left:15.0, right:15.0),
                     child: ListView(
                         controller: scrollController,
                         // physics: NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         children: [
-                          // 공지사항 배너
-                          CarouselSlider(
-                            options: CarouselOptions(
-                              height: 120,
-                              viewportFraction: 1.0,
-                              enlargeCenterPage: false,
-                              autoPlay: true,
-                              autoPlayInterval: const Duration(seconds: 3),
-                            ),
-                            items: BannerData.items.toList().map((item) => GestureDetector(
-                                child: Image.network(item.img_src, fit:BoxFit.cover, width: 900),
-                                onTap: () {
-
-                                  Navigator.of(context,rootNavigator: true).push(
-                                      MaterialPageRoute(builder: (context) =>
-                                          NoticeView(wrId:item.link))
-                                  );
-                                }
-                            ))
-                                .toList(),
-                          ),
-                          // 일반 배너
-                          const SizedBox(height: 10,),
                           GestureDetector(
                             onTap: () {
                               Navigator.of(context,rootNavigator: true).push(
@@ -130,34 +107,90 @@ class HomePageState extends State<HomePage> {
                                       const ConsultWrite())
                               );
                             }, // Image tapped
-                            child: Image.asset(
-                              'assets/images/banner1.png',
+                            child: const Align(
+                              alignment: Alignment.centerLeft,
+                              child:  Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text("우리동네SOS ", style: TextStyle(fontFamily: 'SCDream', fontSize: 22),),
+                                      Text("긴급돌봄 서비스", style: TextStyle(fontFamily: 'SCDream', fontSize: 22, fontWeight: FontWeight.bold),),
+                                    ]
+                                  ),
+                                  SizedBox(height: 7,),
+                                  Text("긴급 또는 일시적인 돌봄이 필요할 때", style: TextStyle(fontFamily: 'SCDream', fontSize: 16, color: Color(0xFF626262)),),
+                                  SizedBox(height: 5,),
+                                  Text("상담을 신청하시면 도움을 드리겠습니다.", style: TextStyle(fontFamily: 'SCDream', fontSize: 16, color: Color(0xFF626262)),),
+                                ]
+                              )
                             ),
                           ),
-                          const SizedBox(height: 10,),
-                          // 온라인상담
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.of(context,rootNavigator: true).push(
-                                  MaterialPageRoute(builder: (context) =>
-                                      const ConsultWrite())
-                              );
-                            }, // Image tapped
-                            child: Image.asset(
-                              'assets/images/banner2.png',
-                            ),
+                          const SizedBox(height: 15,),
+                          Row(
+                              children: [
+                                Flexible(
+                                  flex: 11, // default
+                                  fit: FlexFit.tight, // default
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(9.0),
+                                        ),
+                                        side: const BorderSide(width: 2, color:Color(0xff60A7D3)),
+                                        backgroundColor:const Color(0xff60A7D3),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(context,rootNavigator: true).push(
+                                            MaterialPageRoute(builder: (context) =>
+                                            const ConsultWrite())
+                                        );
+                                      },
+                                      child: const Column(
+                                          children: [
+                                            SizedBox(height: 15,),
+                                            Text("온라인상담", style: TextStyle(fontFamily: 'SCDream', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
+                                            SizedBox(height: 5,),
+                                            Text("글 남기기", style: TextStyle(fontFamily: 'SCDream', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                                            SizedBox(height: 15,),
+                                          ]
+                                      )
+                                  )
+                                ),
+                                Flexible(
+                                  flex: 1, // default
+                                  fit: FlexFit.loose, // default
+                                  child: Container(),
+                                ),
+                                Flexible(
+                                  flex: 11, // default
+                                  fit: FlexFit.tight, // default
+                                  // 1522-0365 배너
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(9.0),
+                                        ),
+                                        side: const BorderSide(width: 2, color:Color(0xff9BC360)),
+                                        backgroundColor:const Color(0xff9BC360),
+                                      ),
+                                      onPressed: () {
+                                        launchUrl(Uri.parse('tel: 1522-0365'));
+                                      },
+                                      child: const Column(
+                                        children: [
+                                          SizedBox(height: 15,),
+                                          Text("전화상담", style: TextStyle(fontFamily: 'SCDream', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
+                                          SizedBox(height: 5,),
+                                          Text("1522-0365", style: TextStyle(fontFamily: 'SCDream', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                                          SizedBox(height: 15,),
+                                        ]
+                                      )
+                                    )
+                                )
+                              ]
                           ),
-                          const SizedBox(height: 10,),
-                          // 1522-0365 배너
-                          GestureDetector(
-                            onTap: () {
-                              launchUrl(Uri.parse('tel: 1522-0365'));
-                            }, // Image tapped
-                            child: Image.asset(
-                              'assets/images/banner3.png',
-                            ),
-                          ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 15),
                           // 현재까지 걸음수
                           GestureDetector(
                               onTap: (){
@@ -187,25 +220,52 @@ class HomePageState extends State<HomePage> {
                                   vertical: 20.0,
                                 ),
                                 child:Row(
-                                  mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.max,
                                   // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Image.asset(
-                                      'assets/images/step1.png',
-                                    ),
-                                    const Padding(padding: EdgeInsets.only(left: 15) ),
-                                    Text("탄소중립걷기 $step 걸음 ", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
-                                    const Expanded(child:
-                                            Align(alignment: Alignment.topRight,
-                                            child: Icon(Icons.arrow_forward_ios,)))
+                                    // Image.asset(
+                                    //   'assets/images/step1.png',
+                                    // ),
+                                    // const Padding(padding: EdgeInsets.only(left: 15) ),
+                                    const Text("오늘의 탄소중립걷기 ", style: TextStyle(fontFamily: 'SCDream', fontSize: 15),),
+                                    Text(" $step ", style: const TextStyle(color: Color(0xFFFF6D1C), fontFamily: 'SCDream', fontWeight: FontWeight.bold, fontSize: 24),),
+                                    const Text(" 걸음 ", style: TextStyle(fontFamily: 'SCDream', fontSize: 15),),
+                                    // const Expanded(child:
+                                    //         Align(alignment: Alignment.topRight,
+                                    //         child: Icon(Icons.arrow_forward_ios,)))
                                   ]
                                 ),
                               ),
                           ),
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 10),
+                          // 공지사항 배너
+                          CarouselSlider(
+                            options: CarouselOptions(
+                              height: 120,
+                              viewportFraction: 1.0,
+                              enlargeCenterPage: false,
+                              autoPlay: true,
+                              autoPlayInterval: const Duration(seconds: 3),
+                            ),
+                            items: BannerData.items.toList().map((item) => GestureDetector(
+                                child: Image.network(item.img_src, fit:BoxFit.cover, width: 900),
+                                onTap: () {
+
+                                  Navigator.of(context,rootNavigator: true).push(
+                                      MaterialPageRoute(builder: (context) =>
+                                          NoticeView(wrId:item.link))
+                                  );
+                                }
+                            ))
+                                .toList(),
+                          ),
+                          // 일반 배너
+                          const SizedBox(height: 10,),
+
                           // 동네소식
                           Container(
-                              height: 580,
+                              height: 630,
                               color: Colors.transparent,
                               child: GridView.builder(
                                 shrinkWrap: false,
@@ -217,21 +277,12 @@ class HomePageState extends State<HomePage> {
                                 crossAxisCount: crossAxisCount,
                                 childAspectRatio: aspectRatio),
                                 itemBuilder: (context, index) {
-                                  return Card(
-                                    semanticContainer: true,
-                                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(0),
-                                    ),
-                                    elevation: 1,
-                                    margin: const EdgeInsets.only(left: 0, top: 5, right:0, bottom: 10),
-                                  // TODO: Adjust card heights (123)
-                                    child: Column(
+                                  return Column(
                                     // TODO: Center items on the card (123)
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: <Widget>[
                                         Padding(
-                                            padding: const EdgeInsets.fromLTRB(10.0, 20.0, 16.0, 8.0),
+                                            padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 15),
                                             child: GestureDetector(
                                               onTap: () {
                                                 Navigator.of(context,rootNavigator: true).push(
@@ -252,112 +303,144 @@ class HomePageState extends State<HomePage> {
                                                           }
                                                   });
                                               },
-                                              child: Row(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                // TODO: Change innermost Column (123)
-                                                children: <Widget>[
-                                                  SizedBox (
-                                                    width: BoardData.items[index].thum != "" ? screenWidth - 160 : screenWidth - 50,
-                                                    child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: <Widget>[
-                                                        RichText(
-                                                          overflow: TextOverflow.ellipsis,
-                                                          maxLines: 2,
-                                                          text: TextSpan(
-                                                              text: BoardData.items[index].wr_content,
-                                                              style: const TextStyle(
-                                                                  color: Colors.black,
-                                                                  height: 1.4,
-                                                                  fontSize: 16.0,)),
-                                                        ),
-                                                        const SizedBox(height: 5,),
-                                                        Align(alignment: Alignment.topLeft,
-                                                          child: Text(BoardData.items[index].wr_date)
-                                                        ),
-                                                        const SizedBox(height: 5,),
-                                                        Align(alignment: Alignment.topLeft,
-                                                          child: RichText(
-                                                            text: TextSpan(
-                                                              children: [
-                                                                const WidgetSpan(
-                                                                  child: Icon(Icons.favorite, size: 14),
-                                                                ),
-                                                                const TextSpan(
-                                                                  text: "  ",
-                                                                  style: TextStyle(
-                                                                    color: Color(0xFF8CC152),
-                                                                    fontSize: 14.0,
-                                                                    fontWeight: FontWeight.bold,
-                                                                  ),
-                                                                ),
-                                                                TextSpan(
-                                                                  text: BoardData.items[index].wr_like.toString(),
-                                                                  style: const TextStyle(
-                                                                    color: Color(0xFF8CC152),
-                                                                    fontSize: 12.0,
-                                                                    fontWeight: FontWeight.bold,
-                                                                  ),
-                                                                ),
-                                                                const TextSpan(
-                                                                  text: "    ",
-                                                                  style: TextStyle(
-                                                                    color: Color(0xFF8CC152),
-                                                                    fontSize: 14.0,
-                                                                    fontWeight: FontWeight.bold,
-                                                                  ),
-                                                                ),
-                                                                const WidgetSpan(
-                                                                  child: Icon(Icons.comment, size: 14),
-                                                                ),
-                                                                const TextSpan(
-                                                                  text: "  ",
-                                                                  style: TextStyle(
-                                                                    color: Color(0xFF8CC152),
-                                                                    fontSize: 12.0,
-                                                                    fontWeight: FontWeight.bold,
-                                                                  ),
-                                                                ),
-                                                                TextSpan(
-                                                                  text: BoardData.items[index].wr_comment.toString(),
-                                                                  style: const TextStyle(
-                                                                    color: Color(0xFF8CC152),
-                                                                    fontSize: 12.0,
-                                                                    fontWeight: FontWeight.bold,
-                                                                  ),
-                                                                ),
 
-                                                              ],
+                                              child:
+                                                Stack(
+                                                  children: [
+                                                    if(BoardData.items[index].thum != "")
+                                                      Positioned(
+                                                        top: 0,
+                                                        right: -20,
+                                                        child: Container(
+                                                          width: 120,
+                                                          child:Image.network(BoardData.items[index].thum, fit:BoxFit.fitHeight, width: screenWidth)
+                                                        )
+                                                      ),
+
+                                                    Positioned(
+                                                        bottom: 5,
+                                                        right: 0,
+                                                        child: RichText(
+                                                        text: TextSpan(
+                                                          children: [
+                                                            const WidgetSpan(
+                                                              child: Icon(Icons.favorite, size: 14, color: Color(0xFFA5A5A5),),
                                                             ),
-                                                          )
+                                                            const TextSpan(
+                                                              text: "  ",
+                                                              style: TextStyle(
+                                                                color: Color(0xFF8CC152),
+                                                                fontSize: 14.0,
+                                                                fontWeight: FontWeight.bold,
+                                                              ),
+                                                            ),
+                                                            TextSpan(
+                                                              text: BoardData.items[index].wr_like.toString(),
+                                                              style: const TextStyle(
+                                                                color: Color(0xFF8CC152),
+                                                                fontSize: 12.0,
+                                                                fontWeight: FontWeight.bold,
+                                                              ),
+                                                            ),
+                                                            const TextSpan(
+                                                              text: "    ",
+                                                              style: TextStyle(
+                                                                color: Color(0xFF8CC152),
+                                                                fontSize: 14.0,
+                                                                fontWeight: FontWeight.bold,
+                                                              ),
+                                                            ),
+                                                            const WidgetSpan(
+                                                              child: Icon(Icons.comment, size: 14, color: Color(0xFFA5A5A5),),
+                                                            ),
+                                                            const TextSpan(
+                                                              text: "  ",
+                                                              style: TextStyle(
+                                                                color: Color(0xFF8CC152),
+                                                                fontSize: 12.0,
+                                                                fontWeight: FontWeight.bold,
+                                                              ),
+                                                            ),
+                                                            TextSpan(
+                                                              text: BoardData.items[index].wr_comment.toString(),
+                                                              style: const TextStyle(
+                                                                color: Color(0xFF8CC152),
+                                                                fontSize: 12.0,
+                                                                fontWeight: FontWeight.bold,
+                                                              ),
+                                                            ),
+
+                                                          ],
+                                                        )
+                                                      )
+                                                    ),
+                                                    Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Align(alignment: Alignment.topLeft,
+                                                            child: Container(
+                                                                width: 60,
+                                                                alignment: Alignment.topLeft,
+                                                                padding: const EdgeInsets.fromLTRB(2, 6, 2, 6),
+                                                                decoration: const BoxDecoration(
+                                                                    color: Color(0xFFE1E1E1),
+                                                                    borderRadius: BorderRadius.all(Radius.circular(10.0))
+                                                                ),
+                                                                child: const Center(child: Text('동네소식', style: TextStyle(
+                                                                  color: Color(0xFF818181),
+                                                                  fontFamily: 'SCDream',
+                                                                  fontSize: 11.0,
+                                                                  fontWeight: FontWeight.bold,
+                                                                )),
+                                                                )
+                                                            )
                                                         ),
                                                       ]
-                                                    )
-                                                  ),
-                                                  if(BoardData.items[index].thum != "")
-                                                    Flexible(
-                                                        child:
-                                                        Align(alignment: Alignment.topRight,
-                                                            child: Container (
-                                                            width: 100,
-                                                            padding: const EdgeInsets.only(left:10.0),
-                                                            child:Image.network(BoardData.items[index].thum, fit:BoxFit.fitHeight, width: screenWidth))
-                                                    ))
+                                                    ),
+                                                    Row(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: <Widget>[
+                                                          Container (
+                                                            padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+                                                            width: BoardData.items[index].thum != "" ? screenWidth - 140 : screenWidth - 60,
+                                                            child: Column(
+                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                  children: <Widget>[
+                                                                    RichText(
+                                                                      overflow: TextOverflow.ellipsis,
+                                                                      maxLines: 2,
+                                                                      text: TextSpan(
+                                                                          text: BoardData.items[index].wr_content,
+                                                                          style: const TextStyle(
+                                                                            color: Colors.black,
+                                                                            fontFamily: 'SCDream',
+                                                                            fontWeight: FontWeight.bold,
+                                                                            height: 1.8,
+                                                                            fontSize: 14.0,)),
+                                                                    ),
+                                                                    const SizedBox(height: 15,),
+                                                                    Align(alignment: Alignment.topLeft,
+                                                                        child: Text('${BoardData.items[index].wr_area} · ${BoardData.items[index].wr_date} · 조회${BoardData.items[index].wr_hit.toString()}회',
+                                                                            style:const TextStyle(
+                                                                                fontWeight: FontWeight.bold,
+                                                                                color: Color(0xFFA5A5A5),
+                                                                                fontFamily: 'SCDream',
+                                                                                fontSize: 11.0)
+                                                                        )
+                                                                    ),
+                                                                    const SizedBox(height: 5,),
+                                                                  ]
+                                                              )
+                                                          ),
+                                                        ]
+                                                    ),
+                                                  ]
 
-
-                                                  // AspectRatio(
-                                                  //   aspectRatio: 20 / 11,
-                                                  //   child: GestureDetector(
-                                                  //       child: Image.network(BoardData.items[index].thum, fit:BoxFit.fitWidth, width: screenWidth),
-                                                  //
-                                                  //   )
-                                                  // )
-                                                ]
+                                                ),
                                             )
-                                            )
-                                        )
+                                        ),
+                                        const Divider(thickness: 1, height: 1, color: Color(0xFFA5A5A5)),
                                       ]
-                                    )
                                   );
                                 }
                               )

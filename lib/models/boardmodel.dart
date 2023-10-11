@@ -56,7 +56,7 @@ class BoardModel {
       this.mb_id,
       this.thum,
       // this.file,
-      // this.wr_area,
+      this.wr_area,
       this.wr_mb_img,
       this.wr_comment,
       this.wr_like,
@@ -68,7 +68,8 @@ class BoardModel {
       this.total_page,
       this.wr_datetime,
       this.wr_datetime2,
-      this.wr_date
+      this.wr_date,
+      this.wr_hit
       );
 
   String wr_id;
@@ -83,7 +84,7 @@ class BoardModel {
   // String wr_facebook_user;
   // String wr_twitter_user;
   // String wr_link1;
-  // String wr_area;
+  String wr_area;
   String wr_mb_img;
   String wr_comment;
   int wr_like;
@@ -96,6 +97,7 @@ class BoardModel {
   String wr_datetime;
   String wr_datetime2;
   String wr_date;
+  String wr_hit;
 
   factory BoardModel.fromJson(Map<String, dynamic> json) => _$BoardModelFromJson(json);
 

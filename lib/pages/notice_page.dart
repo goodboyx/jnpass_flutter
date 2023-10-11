@@ -219,72 +219,21 @@ class NoticePageState extends State<NoticePage> {
                                                       text: TextSpan(
                                                           text: NoticeBoardData.items[index].wr_subject,
                                                           style: const TextStyle(
-                                                              color: Colors.black,
-                                                              height: 1.4,
-                                                              fontSize: 16.0,
-                                                              fontFamily: 'NanumSquareRegular')),
+                                                            color: Colors.black,
+                                                            fontFamily: 'SCDream',
+                                                            fontWeight: FontWeight.bold,
+                                                            height: 1.8,
+                                                            fontSize: 14.0,)),
                                                     )
                                                 ),
-                                                const SizedBox(height: 5,),
+                                                const SizedBox(height: 10,),
                                                 Align(alignment: Alignment.topLeft,
-                                                    child: Text(NoticeBoardData.items[index].wr_date)
+                                                    child: Text(NoticeBoardData.items[index].wr_date, style: const TextStyle(
+                                                        color: Color(0xFFA5A5A5),
+                                                        fontSize: 12.0,
+                                                        fontFamily: 'SCDream'))
                                                 ),
                                                 const SizedBox(height: 5,),
-                                                // Align(alignment: Alignment.topLeft,
-                                                //     child: RichText(
-                                                //       text: TextSpan(
-                                                //         children: [
-                                                //           const WidgetSpan(
-                                                //             child: Icon(Icons.favorite, size: 14),
-                                                //           ),
-                                                //           const TextSpan(
-                                                //             text: "  ",
-                                                //             style: TextStyle(
-                                                //               color: Color(0xFF8CC152),
-                                                //               fontSize: 14.0,
-                                                //               fontWeight: FontWeight.bold,
-                                                //             ),
-                                                //           ),
-                                                //           TextSpan(
-                                                //             text: NoticeBoardData.items[index].wr_like.toString(),
-                                                //             style: const TextStyle(
-                                                //               color: Color(0xFF8CC152),
-                                                //               fontSize: 12.0,
-                                                //               fontWeight: FontWeight.bold,
-                                                //             ),
-                                                //           ),
-                                                //           const TextSpan(
-                                                //             text: "    ",
-                                                //             style: TextStyle(
-                                                //               color: Color(0xFF8CC152),
-                                                //               fontSize: 14.0,
-                                                //               fontWeight: FontWeight.bold,
-                                                //             ),
-                                                //           ),
-                                                //           const WidgetSpan(
-                                                //             child: Icon(Icons.comment, size: 14),
-                                                //           ),
-                                                //           const TextSpan(
-                                                //             text: "  ",
-                                                //             style: TextStyle(
-                                                //               color: Color(0xFF8CC152),
-                                                //               fontSize: 12.0,
-                                                //               fontWeight: FontWeight.bold,
-                                                //             ),
-                                                //           ),
-                                                //           TextSpan(
-                                                //             text: NoticeBoardData.items[index].wr_comment.toString(),
-                                                //             style: const TextStyle(
-                                                //               color: Color(0xFF8CC152),
-                                                //               fontSize: 12.0,
-                                                //               fontWeight: FontWeight.bold,
-                                                //             ),
-                                                //           ),
-                                                //
-                                                //         ],
-                                                //       ),
-                                                //     )
-                                                // ),
                                               ]
                                           )
                                       ),
@@ -310,7 +259,7 @@ class NoticePageState extends State<NoticePage> {
                         ),
                         const Divider(
                           thickness: 1,
-                          color: Colors.grey,
+                          color: Color(0xFFA5A5A5),
                         )
 
 
