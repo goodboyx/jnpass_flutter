@@ -319,9 +319,7 @@ Future<void> main() async {
   //   ),
   // );
 
-  // IOS 용
-  // await Firebase.initializeApp(name: 'jbi',options: DefaultFirebaseOptions.currentPlatform);
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(name: Platform.isIOS?'jnpass':null,options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   if (!kIsWeb) {
@@ -586,23 +584,24 @@ Future<void> step_count(value) async {
   todaySteps = prefs.getInt('todaySteps') ?? 0;
   debugPrint('step_count v $todaySteps');
 
-  // ISO 작업시 주석 처리
-  var f = NumberFormat('###,###,###,###');
+  // 안드로이드일때만 되도록
+  if(Platform.isAndroid) {
+    var f = NumberFormat('###,###,###,###');
 
-  flutterLocalNotificationsPlugin.show(
-    888,
-    '${f.format(todaySteps)} 걸음',
-    '하루에 10,000 걸음 우리동네 SOS',
-    const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'my_foreground',
-        'MY FOREGROUND SERVICE',
-        icon: 'ic_bg_service_small',
-        ongoing: true,
+    flutterLocalNotificationsPlugin.show(
+      888,
+      '${f.format(todaySteps)} 걸음',
+      '하루에 10,000 걸음 우리동네 SOS',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'my_foreground',
+          'MY FOREGROUND SERVICE',
+          icon: 'ic_bg_service_small',
+          ongoing: true,
+        ),
       ),
-    ),
-  );
-
+    );
+  }
 
 }
 
@@ -686,22 +685,25 @@ void onStepCount(StepCount event) {
   todaySteps = pref.getInt('todaySteps') ?? 0;
   debugPrint('step_count v $todaySteps');
 
-  // ISO 작업시 주석 처리
-  var f = NumberFormat('###,###,###,###');
+  // Andriod 일때만
+  if(Platform.isAndroid)
+  {
+    var f = NumberFormat('###,###,###,###');
 
-  flutterLocalNotificationsPlugin.show(
-    888,
-    '${f.format(todaySteps)} 걸음',
-    '하루에 10,000 걸음 우리동네 SOS',
-    const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'my_foreground',
-        'MY FOREGROUND SERVICE',
-        icon: 'ic_bg_service_small',
-        ongoing: true,
+    flutterLocalNotificationsPlugin.show(
+      888,
+      '${f.format(todaySteps)} 걸음',
+      '하루에 10,000 걸음 우리동네 SOS',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'my_foreground',
+          'MY FOREGROUND SERVICE',
+          icon: 'ic_bg_service_small',
+          ongoing: true,
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   todaySteps = pref.getInt("todaySteps") ?? 0;
   stepProvider.setStep(todaySteps);
@@ -1334,9 +1336,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _configureSelectNotificationSubject() {
     selectNotificationStream.stream.listen((String? payload) async {
-      print('payLoad :: $payload');
+      debugPrint('payLoad :: $payload');
       Map<String,dynamic> valueMap = Util.jsonStringToMap(payload!);
-      print('valueMap :: $valueMap');
+      debugPrint('valueMap :: $valueMap');
 
       _handleNotification(valueMap);
 

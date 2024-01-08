@@ -8,9 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jnpass/api/jsonapi.dart';
-// import 'package:mqtt_client/mqtt_client.dart';
-// import 'package:mqtt_client/mqtt_server_client.dart';
-import 'package:multi_image_picker2/multi_image_picker2.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
@@ -66,7 +63,7 @@ class DonationViewState extends State<DonationView> {
   final ScrollController scBoard = ScrollController();
   // late MqttServerClient client;
 
-  List<Asset> imageList = <Asset>[];
+  // List<Asset> imageList = <Asset>[];
   String error = 'No Error Dectected';
   int _count = 0;        // 이미지 갯수
   late SharedPreferences prefs;
@@ -569,125 +566,125 @@ class DonationViewState extends State<DonationView> {
   }
 
   // 사진첩 가져오기
-  Future<void> loadAssets() async {
-    List<Asset> resultList = <Asset>[];
-    // String error = '';
+  // Future<void> loadAssets() async {
+  //   List<Asset> resultList = <Asset>[];
+  //   // String error = '';
+  //
+  //   try {
+  //     resultList = await MultiImagePicker.pickImages(
+  //       maxImages: 10,
+  //       enableCamera: true,
+  //       selectedAssets: imageList,
+  //       cupertinoOptions: const CupertinoOptions(
+  //         takePhotoIcon: "chat",
+  //         doneButtonTitle: "등록",
+  //         // autoCloseOnSelectionLimit:false,  //선택 제한에 도달하는 즉시 이미지 선택기가 닫힙니다.
+  //       ),
+  //       materialOptions: const MaterialOptions(
+  //         actionBarColor: "#000000",
+  //         // actionBarTitleColor: "#FFFFFF",
+  //         actionBarTitle: "사진 가져오기",
+  //         allViewTitle: "전체",
+  //         useDetailsView: false,
+  //         selectCircleStrokeColor: "#000000",
+  //       ),
+  //     );
+  //   } on Exception catch (e) {
+  //     error = e.toString();
+  //   }
+  //
+  //   // If the widget was removed from the tree while the asynchronous platform
+  //   // message was in flight, we want to discard the reply rather than calling
+  //   // setState to update our non-existent appearance.
+  //   if (!mounted) return;
+  //
+  //   setState(() {
+  //     if(resultList.isNotEmpty)
+  //     {
+  //       imageList = resultList;
+  //     }
+  //
+  //     // _error = error;
+  //     _count = imageList.length;
+  //   });
+  //
+  //   if(_count > 0)
+  //   {
+  //     Uri url = Uri.parse('${appApiUrl}app_comment_action.php');
+  //     var request = http.MultipartRequest('POST', url);
+  //     // request.headers.content
+  //
+  //     request.fields["token"]    = token;
+  //     request.fields["mb_id"]    = mbId;
+  //     request.fields["bo_table"] = widget.boTable;
+  //     request.fields["wr_parent"]    = widget.wrId;
+  //
+  //     // final dir = await path_provider.getTemporaryDirectory();
+  //     // print('dir = $dir');
+  //
+  //     for (int i = 0; i < imageList.length; i++) {
+  //
+  //       final tempFile = await getFileFromAsset(imageList[i]);
+  //
+  //       var pic = await http.MultipartFile.fromPath("bf_file[]", tempFile.path);
+  //       // var pic = await http.MultipartFile.fromBytes("bf_file", tempFile.readAsBytesSync());
+  //       request.files.add(pic);
+  //     }
+  //
+  //     var res = await request.send();
+  //
+  //     if (res.statusCode == 200) {
+  //       var response = await http.Response.fromStream(res);
+  //       final responseData = json.decode(response.body); // json 응답 값을 decode
+  //       // print("responseData : $responseData");
+  //       // print(responseData['wr_id']);
+  //
+  //       if(responseData['msg'] == "ok")
+  //       {
+  //         // connect(responseData['wr_id'].toString());
+  //
+  //         // ScaffoldMessenger.of(_context)
+  //         //   ..removeCurrentSnackBar()
+  //         //   ..showSnackBar(SnackBar(content: Text("등록되었습니다")));
+  //
+  //         // Navigator.pop(_context, responseData);
+  //       }
+  //       else
+  //       {
+  //         // ScaffoldMessenger.of(_context)
+  //         //   ..removeCurrentSnackBar()
+  //         //   ..showSnackBar(SnackBar(content: Text("등록시 문제가 발생되었습니다.")));
+  //       }
+  //
+  //     }else {
+  //       // print("status code ${res}");
+  //     }
+  //
+  //
+  //   }
+  //   else
+  //   {
+  //     imageList = <Asset>[];
+  //   }
+  // }
 
-    try {
-      resultList = await MultiImagePicker.pickImages(
-        maxImages: 10,
-        enableCamera: true,
-        selectedAssets: imageList,
-        cupertinoOptions: const CupertinoOptions(
-          takePhotoIcon: "chat",
-          doneButtonTitle: "등록",
-          // autoCloseOnSelectionLimit:false,  //선택 제한에 도달하는 즉시 이미지 선택기가 닫힙니다.
-        ),
-        materialOptions: const MaterialOptions(
-          actionBarColor: "#000000",
-          // actionBarTitleColor: "#FFFFFF",
-          actionBarTitle: "사진 가져오기",
-          allViewTitle: "전체",
-          useDetailsView: false,
-          selectCircleStrokeColor: "#000000",
-        ),
-      );
-    } on Exception catch (e) {
-      error = e.toString();
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      if(resultList.isNotEmpty)
-      {
-        imageList = resultList;
-      }
-
-      // _error = error;
-      _count = imageList.length;
-    });
-
-    if(_count > 0)
-    {
-      Uri url = Uri.parse('${appApiUrl}app_comment_action.php');
-      var request = http.MultipartRequest('POST', url);
-      // request.headers.content
-
-      request.fields["token"]    = token;
-      request.fields["mb_id"]    = mbId;
-      request.fields["bo_table"] = widget.boTable;
-      request.fields["wr_parent"]    = widget.wrId;
-
-      // final dir = await path_provider.getTemporaryDirectory();
-      // print('dir = $dir');
-
-      for (int i = 0; i < imageList.length; i++) {
-
-        final tempFile = await getFileFromAsset(imageList[i]);
-
-        var pic = await http.MultipartFile.fromPath("bf_file[]", tempFile.path);
-        // var pic = await http.MultipartFile.fromBytes("bf_file", tempFile.readAsBytesSync());
-        request.files.add(pic);
-      }
-
-      var res = await request.send();
-
-      if (res.statusCode == 200) {
-        var response = await http.Response.fromStream(res);
-        final responseData = json.decode(response.body); // json 응답 값을 decode
-        // print("responseData : $responseData");
-        // print(responseData['wr_id']);
-
-        if(responseData['msg'] == "ok")
-        {
-          // connect(responseData['wr_id'].toString());
-
-          // ScaffoldMessenger.of(_context)
-          //   ..removeCurrentSnackBar()
-          //   ..showSnackBar(SnackBar(content: Text("등록되었습니다")));
-
-          // Navigator.pop(_context, responseData);
-        }
-        else
-        {
-          // ScaffoldMessenger.of(_context)
-          //   ..removeCurrentSnackBar()
-          //   ..showSnackBar(SnackBar(content: Text("등록시 문제가 발생되었습니다.")));
-        }
-
-      }else {
-        // print("status code ${res}");
-      }
-
-
-    }
-    else
-    {
-      imageList = <Asset>[];
-    }
-  }
-
-  Future<File> getFileFromAsset(Asset asset) async {
-    ByteData byteData = await asset.getThumbByteData(asset.originalWidth!, asset.originalHeight!, quality: 100);
-
-    // String _name = TextMode.trimTextAfterLastSpecialCharacter(asset.name, '.');
-
-    String name = asset.name.toString();
-
-    // print('asset name is : ${asset.name}');
-
-    final tempFile = File('${(await getTemporaryDirectory()).path}/$name');
-    await tempFile.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    await tempFile.create(recursive: true);
-
-    File file = tempFile;
-
-    return file;
-  }
+  // Future<File> getFileFromAsset(Asset asset) async {
+  //   ByteData byteData = await asset.getThumbByteData(asset.originalWidth!, asset.originalHeight!, quality: 100);
+  //
+  //   // String _name = TextMode.trimTextAfterLastSpecialCharacter(asset.name, '.');
+  //
+  //   String name = asset.name.toString();
+  //
+  //   // print('asset name is : ${asset.name}');
+  //
+  //   final tempFile = File('${(await getTemporaryDirectory()).path}/$name');
+  //   await tempFile.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+  //   await tempFile.create(recursive: true);
+  //
+  //   File file = tempFile;
+  //
+  //   return file;
+  // }
 
   // 이용후기 등록
   Future<void> putComment(String wrContent) async {

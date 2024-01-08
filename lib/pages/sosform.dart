@@ -1,16 +1,11 @@
+import 'dart:convert';
+import 'dart:async';
+
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:location/location.dart';
-
-import 'dart:convert';
-import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:multi_image_picker2/multi_image_picker2.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants.dart';
@@ -28,7 +23,7 @@ class SosForm extends StatefulWidget {
 }
 
 class SosFormState extends State<SosForm> {
-  List<Asset> imageList = <Asset>[];
+  // List<Asset> imageList = <Asset>[];
 
   LocationData? _location;
   String? _error;
@@ -130,7 +125,7 @@ class SosFormState extends State<SosForm> {
                                 padding: const EdgeInsets.all(15.0),
                                 child: TextButton.icon(
                                   onPressed: () => {
-                                    loadAssets()
+                                    // loadAssets()
                                   },
                                   icon: Column(
                                     children: [
@@ -165,50 +160,50 @@ class SosFormState extends State<SosForm> {
 
                                 ),
                               ),
-                              Expanded( child:
-                              imageList.isEmpty
-                                  ? Container()
-                                  : SizedBox(
-                                height: 104,
-                                width: MediaQuery.of(context).size.width,
-                                child: ListView.builder(
-                                    padding: const EdgeInsets.only(top: 2),
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: imageList.length,
-                                    itemBuilder: (BuildContext context, int index) {
-                                      Asset asset = imageList[index];
-
-                                      return Card(
-                                          elevation: 3,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(15)),
-                                          child: Stack(
-                                              children: [
-                                                AssetThumb(asset: asset, width: 300, height: 300),
-                                                Positioned(
-                                                  top: 0,
-                                                  right: 0,
-                                                  child: GestureDetector(
-                                                    onTap: (){
-                                                      _showMyDialog(index);
-                                                    },
-                                                    child: const Icon(
-                                                      Icons.delete,
-                                                      color: Colors.red,
-                                                    ),
-                                                  ),
-                                                ),
-                                                Container(
-                                                  decoration: const BoxDecoration(
-                                                    color: Colors.transparent,
-                                                  ),
-                                                ),
-                                              ]
-                                          )
-                                      );
-                                    }),
-                              ),
-                              ),
+                              // Expanded( child:
+                              // imageList.isEmpty
+                              //     ? Container()
+                              //     : SizedBox(
+                              //   height: 104,
+                              //   width: MediaQuery.of(context).size.width,
+                              //   child: ListView.builder(
+                              //       padding: const EdgeInsets.only(top: 2),
+                              //       scrollDirection: Axis.horizontal,
+                              //       itemCount: imageList.length,
+                              //       itemBuilder: (BuildContext context, int index) {
+                              //         Asset asset = imageList[index];
+                              //
+                              //         return Card(
+                              //             elevation: 3,
+                              //             shape: RoundedRectangleBorder(
+                              //                 borderRadius: BorderRadius.circular(15)),
+                              //             child: Stack(
+                              //                 children: [
+                              //                   AssetThumb(asset: asset, width: 300, height: 300),
+                              //                   Positioned(
+                              //                     top: 0,
+                              //                     right: 0,
+                              //                     child: GestureDetector(
+                              //                       onTap: (){
+                              //                         _showMyDialog(index);
+                              //                       },
+                              //                       child: const Icon(
+                              //                         Icons.delete,
+                              //                         color: Colors.red,
+                              //                       ),
+                              //                     ),
+                              //                   ),
+                              //                   Container(
+                              //                     decoration: const BoxDecoration(
+                              //                       color: Colors.transparent,
+                              //                     ),
+                              //                   ),
+                              //                 ]
+                              //             )
+                              //         );
+                              //       }),
+                              // ),
+                              // ),
                             ]
                         ),
 
@@ -403,32 +398,12 @@ class SosFormState extends State<SosForm> {
 
     request.fields["wr_content"] = await json.decode(json.encode(_controller.text));
 
-    for (int i = 0; i < imageList.length; i++) {
-
-      final tempFile = await getFileFromAsset(imageList[i]);
-
-      /*
-      final byteData = await imageList[i].getByteData();
-      Directory? motherDirectory = await getExternalStorageDirectory();
-      Directory dummyDirectory
-      await Directory('${motherDirectory?.path}/dummy')
-          .create(recursive: true);
-
-      File convertedFile = File(
-        '${dummyDirectory.path}/${DateTime.now()}',
-      );
-
-      var bytes = await imageList[i].getByteData();
-      await convertedFile.writeAsBytes(bytes.buffer.asUint8List());
-      */
-
-      // final _filePath = (await getTemporaryDirectory()).path + '/' + imageList[i].name;
-      // print('${dir.absolute.path}/${imageList[i].name}');
-
-      var pic = await http.MultipartFile.fromPath("bf_file[]", tempFile.path);
-      // var pic = await http.MultipartFile.fromBytes("bf_file", tempFile.readAsBytesSync());
-      request.files.add(pic);
-    }
+    // for (int i = 0; i < imageList.length; i++) {
+    //   final tempFile = await getFileFromAsset(imageList[i]);
+    //   var pic = await http.MultipartFile.fromPath("bf_file[]", tempFile.path);
+    //   // var pic = await http.MultipartFile.fromBytes("bf_file", tempFile.readAsBytesSync());
+    //   request.files.add(pic);
+    // }
 
     var res = await request.send();
 
@@ -473,65 +448,65 @@ class SosFormState extends State<SosForm> {
   }
 
   // 사진첩 가져오기
-  Future<void> loadAssets() async {
-    List<Asset> resultList = <Asset>[];
-    String error = '';
+  // Future<void> loadAssets() async {
+  //   List<Asset> resultList = <Asset>[];
+  //   String error = '';
+  //
+  //   try {
+  //     resultList = await MultiImagePicker.pickImages(
+  //       maxImages: 10,
+  //       enableCamera: true,
+  //       selectedAssets: imageList,
+  //       cupertinoOptions: const CupertinoOptions(
+  //         takePhotoIcon: "chat",
+  //         doneButtonTitle: "등록",
+  //         // autoCloseOnSelectionLimit:false,  //선택 제한에 도달하는 즉시 이미지 선택기가 닫힙니다.
+  //       ),
+  //       materialOptions: const MaterialOptions(
+  //         actionBarColor: "#000000",
+  //         // actionBarTitleColor: "#FFFFFF",
+  //         actionBarTitle: "사진 가져오기",
+  //         allViewTitle: "전체",
+  //         useDetailsView: false,
+  //         selectCircleStrokeColor: "#000000",
+  //       ),
+  //     );
+  //   } on Exception catch (e) {
+  //     error = e.toString();
+  //   }
+  //
+  //   // If the widget was removed from the tree while the asynchronous platform
+  //   // message was in flight, we want to discard the reply rather than calling
+  //   // setState to update our non-existent appearance.
+  //   if (!mounted) return;
+  //
+  //   setState(() {
+  //     if(resultList.isNotEmpty) {
+  //       imageList = resultList;
+  //     }
+  //
+  //     error = error;
+  //     _count = imageList.length;
+  //   });
+  // }
 
-    try {
-      resultList = await MultiImagePicker.pickImages(
-        maxImages: 10,
-        enableCamera: true,
-        selectedAssets: imageList,
-        cupertinoOptions: const CupertinoOptions(
-          takePhotoIcon: "chat",
-          doneButtonTitle: "등록",
-          // autoCloseOnSelectionLimit:false,  //선택 제한에 도달하는 즉시 이미지 선택기가 닫힙니다.
-        ),
-        materialOptions: const MaterialOptions(
-          actionBarColor: "#000000",
-          // actionBarTitleColor: "#FFFFFF",
-          actionBarTitle: "사진 가져오기",
-          allViewTitle: "전체",
-          useDetailsView: false,
-          selectCircleStrokeColor: "#000000",
-        ),
-      );
-    } on Exception catch (e) {
-      error = e.toString();
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      if(resultList.isNotEmpty) {
-        imageList = resultList;
-      }
-
-      error = error;
-      _count = imageList.length;
-    });
-  }
-
-  Future<File> getFileFromAsset(Asset asset) async {
-    ByteData byteData = await asset.getThumbByteData(asset.originalWidth!, asset.originalHeight!, quality: 100);
-
-    // String _name = TextMode.trimTextAfterLastSpecialCharacter(asset.name, '.');
-
-    String name = asset.name.toString();
-
-    // print('asset name is : ${asset.name}');
-
-    final tempFile = File('${(await getTemporaryDirectory()).path}/$name');
-    await tempFile.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    await tempFile.create(recursive: true);
-
-    File file = tempFile;
-
-    return file;
-  }
+  // Future<File> getFileFromAsset(Asset asset) async {
+  //   ByteData byteData = await asset.getThumbByteData(asset.originalWidth!, asset.originalHeight!, quality: 100);
+  //
+  //   // String _name = TextMode.trimTextAfterLastSpecialCharacter(asset.name, '.');
+  //
+  //   String name = asset.name.toString();
+  //
+  //   // print('asset name is : ${asset.name}');
+  //
+  //   final tempFile = File('${(await getTemporaryDirectory()).path}/$name');
+  //   await tempFile.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+  //   await tempFile.create(recursive: true);
+  //
+  //   File file = tempFile;
+  //
+  //   return file;
+  // }
 
   // 이미지 삭제 경고창
   Future<void> _showMyDialog(int index) async {
@@ -555,8 +530,8 @@ class SosFormState extends State<SosForm> {
               onPressed: () {
 
                 setState(() {
-                  imageList.removeAt(index);
-                  _count = imageList.length;
+                  // imageList.removeAt(index);
+                  // _count = imageList.length;
                 });
 
                 // print('이미지삭제');
@@ -576,43 +551,6 @@ class SosFormState extends State<SosForm> {
     );
   }
 
-  // Future<MqttServerClient> connect(String wrId) async {
-  //   Random random = Random();
-  //
-  //   // print('app_' + (random.nextInt(90) * 10).toString());
-  //
-  //   MqttServerClient client =
-  //   MqttServerClient.withPort('driver.cloudmqtt.com', 'app_${random.nextInt(10000) * 100}' , 18749);
-  //
-  //   client.logging(on: true);
-  //   client.onConnected = onConnected;
-  //   client.onDisconnected = onDisconnected;
-  //
-  //   try {
-  //     await client.connect('ccsfssyj', '-UJ0-kP8Wr8h');
-  //   } catch (e) {
-  //     // print('mqtt Exception: $e');
-  //     client.disconnect();
-  //   }
-  //
-  //   const pubTopic = 'notice';
-  //   final builder = MqttClientPayloadBuilder();
-  //   builder.addString('new@@write@@$wrId');
-  //
-  //   client.publishMessage(pubTopic, MqttQos.atLeastOnce, builder.payload!);
-  //
-  //   client.disconnect();
-  //   return client;
-  // }
-
-  void onConnected() {
-    // print('Connected');
-  }
-
-  void onDisconnected()
-  {
-    // print('Disconnected');
-  }
 
   @override
   void dispose() {

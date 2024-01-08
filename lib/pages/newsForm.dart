@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jnpass/common.dart';
-import 'package:multi_image_picker2/multi_image_picker2.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -814,25 +813,6 @@ class NewsFormState extends State<NewsForm> {
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   }
 
-  Future<File> getFileFromAsset(Asset asset) async {
-    ByteData byteData = await asset.getThumbByteData(asset.originalWidth!, asset.originalHeight!, quality: 100);
-
-    // String _name = TextMode.trimTextAfterLastSpecialCharacter(asset.name, '.');
-
-    String name = asset.name.toString();
-
-    // print('asset name is : ${asset.name}');
-
-    final tempFile = File('${(await getTemporaryDirectory()).path}/$name');
-    await tempFile.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    await tempFile.create(recursive: true);
-
-    File file = tempFile;
-
-    return file;
-  }
-
-  // 이미지 삭제 경고창
   Future<void> _showMyDialog(int index) async {
     return showDialog<void>(
       context: context,
@@ -840,9 +820,9 @@ class NewsFormState extends State<NewsForm> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('경고'),
-          content: SingleChildScrollView(
+          content: const SingleChildScrollView(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('이미지를 삭제하시겠습니까?'),
                 // Text('Would you like to approve of this message?'),
               ],

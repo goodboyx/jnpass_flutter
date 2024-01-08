@@ -44,6 +44,7 @@ class WalkState extends State<Walk> {
   bool point2Complete = false;
   String step_money = "0";
   String active_money = "0";
+  int total_money = 0;
   int pageCount = 1;
   int totalCount = 1;
   int page_rows = 10;
@@ -402,7 +403,7 @@ class WalkState extends State<Walk> {
                     children: [
                       const Text("나의 보유 포인트 ", textAlign: TextAlign.center,
                         style: TextStyle(color: Color(0XFF626262), fontFamily: 'SCDream', fontSize: 14, ),),
-                      Text((int.parse(step_money) + int.parse(active_money)).toString(), textAlign: TextAlign.center,
+                      Text(f.format(total_money), textAlign: TextAlign.center,
                         style: const TextStyle(color: Color(0XFF60A7D3), fontFamily: 'SCDream', fontSize: 22, fontWeight: FontWeight.bold,),),
                       const Text(" P", textAlign: TextAlign.center,
                         style: TextStyle(color: Color(0XFF626262), fontFamily: 'SCDream', fontSize: 14, ),),
@@ -846,6 +847,9 @@ class WalkState extends State<Walk> {
 
           step_money    = f.format(responseData['step_money']);
           active_money  = f.format(responseData['active_money']);
+
+          total_money = int.parse(responseData['step_money'].toString()) + int.parse(responseData['active_money'].toString());
+
           String result = step.replaceAll(RegExp('[^0-9\\s]'), "");
 
           if(point1 == false && int.parse(result) > 4999)
